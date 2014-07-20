@@ -5,34 +5,40 @@
 #include <zbar.h>
 #include <string>
 #include <iostream>
+#include <time.h>
 
 using namespace cv;
 using namespace std;
 using namespace zbar;
 
-#define FONT		FONT_HERSHEY_PLAIN
+#define FONT FONT_HERSHEY_PLAIN
 #define FONT_COLOR_DATA	Scalar(255,0,255)
-#define LINE_TYPE	CV_AA
+#define LINE_TYPE CV_AA
+#define VIDEOFPS 7.5
+#define VIDEOPATH "video/qr_tracker.avi"
+
 
 int main(){
-	CvCapture* capture = cvCaptureFromCAM(0);
-
-	if(!capture){
-		printf("Capture failure\n");
-		return -1;
+	VideoCapture cap(0); // open the default camera
+    	if(!cap.isOpened()){
+		printf("Capture failure\n"); 
+        	return -1;
 	}
-
 	namedWindow("QR", CV_WINDOW_KEEPRATIO);
 
-	
     	ImageScanner scanner;
     	scanner.set_config(ZBAR_QRCODE, ZBAR_CFG_ENABLE, 1);
 
+	//Frame rate variables
+	time_t start,end;
+	time(&start);
+	int counterTime=0;
+
 	//iterate through each frames of the video
+	Mat frame;
+	cap >> frame;
+	VideoWriter outputVideo(VIDEOPATH, CV_FOURCC('D','I','V','X'), VIDEOFPS, frame.size(), true);
 	while(true){
-
-		Mat frame = cvQueryFrame(capture);
-
 		// Convert to grayscale
 		Mat frame_grayscale;
         	cvtColor(frame, frame_grayscale, CV_BGR2GRAY);
@@ -60,9 +66,17 @@ int main(){
 		        line(frame, Point(symbol->get_location_x(3), symbol->get_location_y(3)), Point(symbol->get_location_x(0), symbol->get_location_y(0)), Scalar(0,255,255), 2, 8, 0);
 		    }
 		}
+		
+		//Print frame rate
+		time(&end);
+		++counterTime;
+		double sec=difftime(end,start);
+		double fps=counterTime/sec;
+		putText(frame, format("FPS: %lf",fps), cvPoint(frame.cols-180, 40), FONT, 2, FONT_COLOR_DATA, 1.5, LINE_TYPE);
 
 		imshow("QR", frame);
-
+		outputVideo.write(frame);
+		cap >> frame;
 
 		//Wait 80mS
 		int c = cvWaitKey(80);

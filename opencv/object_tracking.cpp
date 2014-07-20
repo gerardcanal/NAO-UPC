@@ -5,9 +5,17 @@
 #include <ctype.h>
 #include <iostream>
 #include <math.h>
+#include <time.h>
 
 using namespace cv;
 using namespace std;
+
+#define FONT		FONT_HERSHEY_PLAIN
+#define FONT_COLOR_DATA	Scalar(255,0,255)
+#define LINE_TYPE	CV_AA
+#define VIDEOFPS 4
+#define VIDEOPATH "video/object_tracking.avi"
+
 
 int lowerH=0;
 int lowerS=146;
@@ -45,19 +53,25 @@ void trackObject(Mat imgThresh, Point2f &center, float &area)
 }
 
 int main(){
-	CvCapture* capture = cvCaptureFromCAM(0);
-
-	if(!capture){
-		printf("Capture failure\n");
-		return -1;
+	VideoCapture cap(0); // open the default camera
+    	if(!cap.isOpened()){
+		printf("Capture failure\n"); 
+        	return -1;
 	}
 
 	namedWindow("Tomatoe", CV_WINDOW_KEEPRATIO);
 
-	//iterate through each frames of the video
-	while(true){
+	//Frame rate variables
+	time_t start,end;
+	time(&start);
+	int counterTime=0;
 
-		Mat frame = cvQueryFrame(capture);
+	//iterate through each frames of the video
+	Mat frame;
+	cap >> frame;
+	VideoWriter outputVideo(VIDEOPATH, CV_FOURCC('D','I','V','X'), VIDEOFPS, frame.size(), true);
+	while(true){
+		cap >> frame;
 
 		Mat imgHSV;
 		cvtColor(frame, imgHSV, CV_BGR2HSV); //Change the color format from BGR to HSV
@@ -71,8 +85,17 @@ int main(){
 		trackObject(imgThresh, obj_pos, area);
 		circle(frame, obj_pos, 10, Scalar(20,237,0), -1 , 8, 0);
 		circle(frame, obj_pos, sqrt(area/M_PI), Scalar(20,237,0), 2, 8, 0);
-		imshow("Tomatoe", frame);
+		
+		//Print frame rate
+		time(&end);
+		++counterTime;
+		double sec=difftime(end,start);
+		double fps=counterTime/sec;
+		putText(frame, format("FPS: %lf",fps), cvPoint(frame.cols-180, 40), FONT, 2, FONT_COLOR_DATA, 1.5, LINE_TYPE);
 
+		imshow("Tomatoe", frame);
+		outputVideo.write(frame);
+		cap >> frame;
 
 		//Wait 80mS
 		int c = cvWaitKey(80);

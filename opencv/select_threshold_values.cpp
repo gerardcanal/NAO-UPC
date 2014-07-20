@@ -42,18 +42,19 @@ void setTrackbars(){
 }
 
 int main(){
-	CvCapture* capture = cvCaptureFromCAM(0);
-	if(!capture){
-		printf("Capture failure\n");
-		return -1;
+	VideoCapture cap(0); // open the default camera
+    	if(!cap.isOpened()){
+		printf("Capture failure\n"); 
+        	return -1;
 	}
+
 	namedWindow("Video");
 	namedWindow("Ball", CV_WINDOW_KEEPRATIO);
 	Mat frame;
 	setTrackbars();
 	//iterate through each frames of the video
 	while(true){
-		frame = cvQueryFrame(capture);
+		cap >> frame;
 		Mat imgHSV;
 		cvtColor(frame, imgHSV, CV_BGR2HSV); //Change the color format from BGR to HSV
 		Mat imgThresh = GetThresholdedImage(imgHSV);
@@ -65,7 +66,5 @@ int main(){
 		//If 'ESC' is pressed, break the loop
 		if((char)c==27 ) break;
 	}
-	cvDestroyAllWindows();
-	cvReleaseCapture(&capture);
 	return 0;
 }
