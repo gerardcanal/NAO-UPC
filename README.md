@@ -7,8 +7,4 @@ Repository for nao code development. The goal is to develop 3 tests:
 
 * Shopping list: the robot must recognize which products (from a pre-defined set) are available on the shelves, and which other products are missing, and make a shopping-list.
 
-* One of these possibilities:
-
-  * Meal preparation: the robot must grasp a tomato and put it into a cooking pan.
-
-  * Climbing stairs: the robot must detect and climb or descend each step (steps can have different height).
+* Meal preparation: the robot must grasp a tomato and put it into a cooking pan.
