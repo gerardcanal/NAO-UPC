@@ -12,9 +12,8 @@ Repository for nao code development. The goal is to develop 3 tests:
   https://github.com/Itseez/opencv
 
   ROS do not support OpenCV 3.0, so you need a modified version of vision_opencv(cv_bridge) and image_pipeline.
-  
+
   https://github.com/mikejmills/vision_opencv
-  
   https://github.com/edgarriba/image_pipeline
 
   With this new repositories, you must uninstall this precompiled respositories:
