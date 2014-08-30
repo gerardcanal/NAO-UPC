@@ -20,9 +20,10 @@ public:
 	{
 		image_sub_ = it_.subscribe("/image_raw", 1, &ShoppingListService::imageCb, this);
 		grab_service_ = nh_.advertiseService("/shopping_list/checkObjects", &ShoppingListService::grab, this);
+		//cv::namedWindow("IMAGE");
 	}
 
-    ~ShoppingListService() {}
+    ~ShoppingListService() { /*cv::destroyAllWindows();*/ }
 
     bool grab(shopping_list::checkObjects::Request &req, shopping_list::checkObjects::Response &res)
     {
@@ -49,7 +50,8 @@ public:
 			ROS_ERROR("cv_bridge exception: %s", e.what());
 		return;
 		}
-        img_in_ = cv_ptr->image;
+        cv_ptr->image.copyTo(img_in_);
+        //cv::imshow("IMAGE", img_in_);
     }
 
 private:
