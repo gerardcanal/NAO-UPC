@@ -28,11 +28,12 @@ public:
     bool grab(shopping_list::checkObjects::Request &req, shopping_list::checkObjects::Response &res)
     {
 
-      //img_in_ = cv::imread("/home/eriba/eclipse_ws/nao_buy_list/Data/scene_07.jpg", cv::IMREAD_COLOR);
+      img_in_ = cv::imread("/home/eriba/eclipse_ws/nao_buy_list/Data/scene_07.jpg", cv::IMREAD_COLOR);
 
       shopList_.process(img_in_);
 
       std::vector<int> result = shopList_.getResult();
+      res.num_objects = result.size();
       for (size_t i = 0; i < result.size(); ++i) res.shopping_list.push_back(result[i]);
 
       return true;

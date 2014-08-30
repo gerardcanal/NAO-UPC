@@ -1,2 +1,3 @@
 ---
+int8 num_objects
 int8[] shopping_list

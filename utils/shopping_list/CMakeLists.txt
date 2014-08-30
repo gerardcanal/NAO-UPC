@@ -109,13 +109,15 @@ include_directories(
 
 ## Declare a cpp executable
  add_executable(shopping_list_node src/shopping_list_node.cpp)
+ add_executable(shopping_list_checkObjects_client src/shopping_list_checkObjects_client.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(shopping_list_node shopping_list_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries( shopping_list_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ) 
+ target_link_libraries( shopping_list_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} )
+ target_link_libraries( shopping_list_checkObjects_client ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} )
 
 #############
 ## Install ##

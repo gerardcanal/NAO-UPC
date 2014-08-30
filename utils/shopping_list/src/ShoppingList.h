@@ -12,11 +12,6 @@
 // CURRENT PROJECT
 #include "robust_matcher.h"
 
-const double akaze_thresh = 3e-4;    // AKAZE detection threshold set to locate about 1000 keypoints
-const double ransac_thresh = 5.0f;   // RANSAC inlier threshold
-const double nn_match_ratio = 0.65f; // Nearest-neighbour matching ratio
-const int bb_min_inliers = 10;       // Minimal number of inliers to draw bounding box
-
 class ShoppingList {
 public:
 	explicit ShoppingList(const ros::NodeHandle& nh)
@@ -30,7 +25,7 @@ public:
 		loadData();
 
 		cv::Ptr<cv::Feature2D> akaze = cv::Feature2D::create("AKAZE");
-		akaze->set("threshold", akaze_thresh);
+		akaze->set("threshold", akaze_thresh_);
 
 		rmatcher_.setFeatureDetector(akaze);
 		rmatcher_.setRatio(nn_match_ratio_);
@@ -100,13 +95,13 @@ public:
 		  bool obj_found = num_matches >= 4;
 
 		  // DEBUG INFO
-		  std::cout << " **********************************"                           << std::endl;
-		  std::cout << "Object " << i << (obj_found ? " FOUND" : " NOT FOUND")         << std::endl;
-		  std::cout << "Num matches: " << num_matches                                  << std::endl;
+		  //std::cout << " **********************************"                           << std::endl;
+		  //std::cout << "Object " << i << (obj_found ? " FOUND" : " NOT FOUND")         << std::endl;
+		  //std::cout << "Num matches: " << num_matches                                  << std::endl;
 
 		  if( !obj_found ) continue;
 
-		  H = cv::findHomography( cv::Mat(points_object[i]), cv::Mat(points_scene[i]), cv::RANSAC, ransac_thresh, inliers_mask);
+		  H = cv::findHomography( cv::Mat(points_object[i]), cv::Mat(points_scene[i]), cv::RANSAC, ransac_thresh_, inliers_mask);
 
 		  int num_inliers = 0;
 		  for (int count = 0; count < inliers_mask.rows; ++count) if(inliers_mask.at<uchar>(count)) num_inliers++;
@@ -115,8 +110,8 @@ public:
 		  obj_found = !H.empty() && (num_inliers >= bb_min_inliers_) && (ratio_matches > 10.0f);
 
 		  // DEBUG INFO
-		  std::cout << "Num inliers: " << num_inliers                           << std::endl;
-		  if(obj_found) std::cout << "Ratio matches: " << ratio_matches << " %" << std::endl;
+		  //std::cout << "Num inliers: " << num_inliers                           << std::endl;
+		  //if(obj_found) std::cout << "Ratio matches: " << ratio_matches << " %" << std::endl;
 
 		  //-- Get the corners from the image_1 ( the object to be "detected" )
 		  std::vector<cv::Point2f> obj_corners(4);
