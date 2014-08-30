@@ -21,7 +21,7 @@ public:
   {
 		//To publish the "/image_raw" topic run: $rosrun uvc_camera uvc_camera_node 
     image_sub_ = it_.subscribe("/image_raw", 1, &TomatoTrackerNode::imageCb, this);
-		cv::namedWindow("Tomatoe", CV_WINDOW_KEEPRATIO);
+		cv::namedWindow("Tomatoe", cv::WINDOW_KEEPRATIO);
   }
 
   ~TomatoTrackerNode(){cv::destroyWindow("Tomatoe");}
