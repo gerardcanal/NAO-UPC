@@ -8,10 +8,13 @@ Repository for nao code development. The goal is to develop 3 tests:
 **2. Shopping list:** the robot must recognize which products (from a pre-defined set) are available on the shelves, and which other products are missing, and make a shopping-list.
 
   For this task OpenCV 3.0 is needed to compute AKAZE features.
+  
   https://github.com/Itseez/opencv
 
   ROS do not support OpenCV 3.0, so you need a modified version of vision_opencv(cv_bridge) and image_pipeline.
+  
   https://github.com/mikejmills/vision_opencv
+  
   https://github.com/edgarriba/image_pipeline
 
   With this new repositories, you must uninstall this precompiled respositories:
