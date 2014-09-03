@@ -69,7 +69,7 @@ int main(){
 	//iterate through each frames of the video
 	Mat frame;
 	cap >> frame;
-	VideoWriter outputVideo(VIDEOPATH, CV_FOURCC('D','I','V','X'), VIDEOFPS, frame.size(), true);
+	//VideoWriter outputVideo(VIDEOPATH, CV_FOURCC('D','I','V','X'), VIDEOFPS, frame.size(), true);
 	while(true){
 		cap >> frame;
 
@@ -94,7 +94,7 @@ int main(){
 		putText(frame, format("FPS: %lf",fps), cvPoint(frame.cols-180, 40), FONT, 2, FONT_COLOR_DATA, 1.5, LINE_TYPE);
 
 		imshow("Tomatoe", frame);
-		outputVideo.write(frame);
+		//outputVideo.write(frame);
 		cap >> frame;
 
 		//Wait 80mS
