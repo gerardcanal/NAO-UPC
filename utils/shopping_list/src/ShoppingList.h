@@ -17,17 +17,20 @@ public:
 	explicit ShoppingList(const ros::NodeHandle& nh)
     {
 		nh.getParam("path_to_objects_models", path_to_objects_models_);
+		nh.getParam("detector_type", detector_type_);
 		nh.getParam("akaze_threshold", akaze_thresh_);
+		nh.getParam("orb_nFeatures", orb_nFeatures_);
 		nh.getParam("ransac_threshold", ransac_thresh_);
 		nh.getParam("nn_match_ratio", nn_match_ratio_);
 		nh.getParam("bb_min_inliers", bb_min_inliers_);
 
 		loadData();
 
-		cv::Ptr<cv::Feature2D> akaze = cv::Feature2D::create("AKAZE");
-		akaze->set("threshold", akaze_thresh_);
+		cv::Ptr<cv::Feature2D> detector = cv::Feature2D::create(detector_type_);
+		if( detector_type_ == "AKAZE") detector->set("threshold", akaze_thresh_);
+		else if( detector_type_ == "ORB") detector->setInt("nFeatures", orb_nFeatures_);
 
-		rmatcher_.setFeatureDetector(akaze);
+		rmatcher_.setFeatureDetector(detector);
 		rmatcher_.setRatio(nn_match_ratio_);
 		rmatcher_.trainMatcher(descriptors_objects_);
     }
@@ -146,10 +149,14 @@ private:
     std::vector<std::vector<cv::Point2f> > keypoints_objects_;
 	/* Descriptors of the objects to detect */
 	std::vector<cv::Mat> descriptors_objects_;
+	/* Type of features detector */
+	std::string detector_type_;
 	/* Path to the objects models file */
 	std::string path_to_objects_models_;
 	/* AKAZE detection threshold set to locate about 1000 keypoints */
 	double akaze_thresh_;
+	/* ORB number of features */
+	int orb_nFeatures_;
 	/* RANSAC inlier threshold */
 	double ransac_thresh_;
 	/* Nearest-neighbour matching ratio */

@@ -1,7 +1,8 @@
 <launch>
 
-  <param name="path_to_objects_models" type="str" value="$(find shopping_list)/data/objects_models.yml" />
-  <param name="akaze_threshold" value="3e-4" type="double" />
+  <param name="path_to_objects_models" type="str" value="$(find shopping_list)/data/objects_models_ORB.yml" />
+  <param name="detector_type" value="ORB" type="str" />
+  <param name="orb_nFeatures" value="10000" type="int" />
   <param name="ransac_threshold" value="5.0" type="double" />
   <param name="nn_match_ratio" value="0.65" type="double" />
   <param name="bb_min_inliers" value="10" type="int" />

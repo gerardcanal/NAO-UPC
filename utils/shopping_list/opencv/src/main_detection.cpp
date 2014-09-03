@@ -41,11 +41,15 @@ int main()
   paths_images_objects[2] = "../Data/obj_02.jpg";
   paths_images_objects[3] = "../Data/obj_03.jpg";
 
-  Ptr<Feature2D> akaze = Feature2D::create("AKAZE");
-  akaze->set("threshold", akaze_thresh);
+  //Ptr<Feature2D> detector = Feature2D::create("AKAZE");
+  //akaze->set("threshold", akaze_thresh);
+
+  int nFeatures = 100000;
+  Ptr<Feature2D> detector = Feature2D::create("ORB");
+  detector->setInt("nFeatures", nFeatures);
 
   RobustMatcher rmatcher;
-  rmatcher.setFeatureDetector(akaze);
+  rmatcher.setFeatureDetector(detector);
   rmatcher.setRatio(nn_match_ratio);
 
   // Open scene image
@@ -70,12 +74,12 @@ int main()
 	  }
 
 	  cout << "Computing AKAZE features from object " << i << " ..." << endl;
-	  (*akaze)(images_objects[i], noArray(), keypoints_objects[i], descriptors_objects[i]);
+	  (*detector)(images_objects[i], noArray(), keypoints_objects[i], descriptors_objects[i]);
 
   }
 
   // write to external file
-  FileStorage fs("objects_models.yml", FileStorage::WRITE);
+  FileStorage fs("objects_models_ORB.yml", FileStorage::WRITE);
   fs << "numClasses" << N;
 
   // TOdo: GENERATE FILE WITH SOME STRUCTURE
