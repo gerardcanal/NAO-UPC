@@ -23,8 +23,7 @@ TomatoTracker::TomatoTracker(int lowerH, int lowerS, int lowerV, int upperH, int
 void TomatoTracker::track(Mat frame, Point2f &obj_pos, float &area)
 {
 	Mat imgHSV;
-	//cvtColor(frame, imgHSV, CV_BGR2HSV); 
-	cvtColor(frame, imgHSV, COLOR_BGR2HSV);
+	scvtColor(frame, imgHSV, CV_BGR2HSV); 
 
 	Mat imgThresh = getThresholdedImage(imgHSV);
 
