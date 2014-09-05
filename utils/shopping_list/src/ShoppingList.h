@@ -27,7 +27,7 @@ public:
 		loadData();
 
 		cv::Ptr<cv::Feature2D> detector = cv::Feature2D::create(detector_type_);
-		if( detector_type_ == "AKAZE") detector->set("threshold", akaze_thresh_);
+		if( detector_type_ == "AKAZE") detector->setDouble("threshold", akaze_thresh_);
 		else if( detector_type_ == "ORB") detector->setInt("nFeatures", orb_nFeatures_);
 
 		rmatcher_.setFeatureDetector(detector);
