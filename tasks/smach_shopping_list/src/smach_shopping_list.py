@@ -4,7 +4,12 @@ import roslib; roslib.load_manifest('smach_shopping_list')
 import rospy
 import smach
 import smach_ros
+
+from smach_ros import ServiceState
+from shopping_list.srv import checkObjects
+
 import random # for simulation
+
 
 # define state IDLE - Waiting state
 class Idle(smach.State):
@@ -47,17 +52,28 @@ class Task2(smach.State):
         smach.State.__init__(self, outcomes=['succeeded','aborted','preempted'])
         self.counter = 0
         self.max_counter = 2
+        self._ss = ServiceState('shopping_list/checkObjects', checkObjects, response_cb = self.response_cb)
 
     def execute(self, userdata):
         rospy.loginfo('Executing state TASK 2')
+        
         if random.randint(0, 4*self.max_counter) > self.max_counter:
             return 'aborted'
         elif self.counter < self.max_counter:
-            self.counter += 1
-            rospy.sleep(1.)
-            return 'preempted'   
+            self._ss.execute(userdata)    
         else:
-            return 'succeeded' 
+            return 'aborted'
+  
+    def response_cb(self, msg):
+
+        print msg
+        print msg.res.num_objects
+        print msg.res.shopping_list
+
+        if msg.res.num_objects <= 0:
+            return 'preempted'
+        else:
+            return 'succeded'
 
 
 # define state Task3 - Meal preparation
