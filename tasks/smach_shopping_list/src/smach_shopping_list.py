@@ -12,6 +12,7 @@ import random # for simulation
 
 
 # define state IDLE - Waiting state
+# this state could be changeg by a concurrence SM
 class Idle(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['toTask1','toTask2','toTask3'], 
@@ -45,25 +46,7 @@ class Task1(smach.State):
         else:
             return 'succeeded'        
 
-'''
-# define state Task2 - Shopping list
-class Task2(smach.State):
-    def __init__(self):
-        smach.State.__init__(self, outcomes=['succeeded','aborted','preempted'])
-        self.counter = 0
-        self.max_counter = 3
 
-    def execute(self, userdata):
-        rospy.loginfo('Executing state TASK 2')
-        if random.randint(0, 4*self.max_counter) > self.max_counter:
-            return 'aborted'
-        elif self.counter < self.max_counter:
-            self.counter += 1
-            rospy.sleep(2.)
-            return 'preempted'   
-        else:
-            return 'succeeded' 
-'''
 # define state Task2 - Shopping list
 class Task2(ServiceState):
     def __init__(self, name, spec):
@@ -71,7 +54,7 @@ class Task2(ServiceState):
                                     service_spec=spec,
                                     response_cb=self.response_cb)
         self.counter = 0
-        self.max_counter = 3
+        self.max_counter = 1
         self.reponse = 0
 
 
