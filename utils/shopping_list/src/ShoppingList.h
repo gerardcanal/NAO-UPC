@@ -75,6 +75,9 @@ public:
 
 	void process(const cv::Mat& img_in)
 	{
+        // Clear previous results
+        result_.clear();
+
 		// Matching
 		std::vector<cv::DMatch> good_matches;
 		std::vector<cv::KeyPoint> keypoints_scene;
