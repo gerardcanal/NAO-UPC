@@ -19,7 +19,7 @@ class CheckService(smach.State):
         self._serviceName = serviceName
         self._sp = xmlrpclib.ServerProxy(os.environ['ROS_MASTER_URI'])
         self.timeinit = rospy.Time.now()
-        self.timeout = rospy.Duration(100)
+        self.timeout = rospy.Duration(10)
 
     def execute(self, userdata):
         rospy.loginfo('CheckService')
