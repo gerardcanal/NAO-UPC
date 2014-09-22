@@ -17,7 +17,7 @@ find_package(catkin REQUIRED
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
- find_package(OpenCV 3.0.0 REQUIRED)
+ find_package(OpenCV REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -109,7 +109,6 @@ include_directories(
 
 ## Declare a cpp executable
  add_executable(shopping_list_node src/shopping_list_node.cpp)
- add_executable(shopping_list_checkObjects_client src/shopping_list_checkObjects_client.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -117,7 +116,6 @@ include_directories(
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries( shopping_list_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} )
- target_link_libraries( shopping_list_checkObjects_client ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} )
 
 #############
 ## Install ##
