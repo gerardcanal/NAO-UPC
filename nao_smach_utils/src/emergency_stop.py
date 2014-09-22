@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from nao_msgs.msg import TactileTouch, Bumper
+from std_msgs.msg import String
 from geometry_msgs.msg import Twist, Vector3
 
 ''' Stop the walking of the NAO in case the head button or foot bumpers are pressed '''
@@ -34,4 +35,8 @@ if __name__ == '__main__':
     pub = rospy.Publisher('/cmd_vel', Twist)
     rospy.Subscriber("bumper", Bumper, bumper_callback, callback_args=pub)
     rospy.Subscriber("tactile_touch", TactileTouch, tactile_touch_callback, callback_args=pub)
+
+    speak = rospy.Publisher('/speech', String, latch=True)
+    speak.publish(String('Emergency Stop has been enabled!'))
+    
     rospy.spin()
