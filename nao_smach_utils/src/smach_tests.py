@@ -26,8 +26,8 @@ if __name__ == "__main__":
         def callback(userdata, request):
             return StepTarget(leg=0, pose=Pose2D(0.0, -1.0, 0.0))
         smach.StateMachine.add('FOOTSTEP', FootstepState(request_cb=callback), transitions={'succeeded': 'WAIT_STOP'})
-        #smach.StateMachine.add('EXECUTE_BEHAVIOUR', ExecuteBehavior('beha'))
-        #smach.StateMachine.add('EXECUTE_BEHAVIOUR', ExecuteBehaviour('behaviour'), transitions={'succeeded': 'WAIT_STOP'})
+        #smach.StateMachine.add('EXECUTE_BEHAVIOUR', ExecuteBehavior('firstgraspTest'))
+        smach.StateMachine.add('EXECUTE_BEHAVIOUR', ExecuteBehavior('firstgraspTest'), transitions={'succeeded': 'WAIT_STOP'})
         smach.StateMachine.add('WAIT_STOP', TimeOutState(10), transitions={'succeeded': 'DISABLE_STIFF'})
         smach.StateMachine.add('DISABLE_STIFF', DisableStiffnessState())
 

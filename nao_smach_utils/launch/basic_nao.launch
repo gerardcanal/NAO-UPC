@@ -1,0 +1,22 @@
+<launch>
+  <!-- 
+    start Nao control and sensor nodes so that they connect to a local NaoQI
+    (e.g. a local simulated one or when running directly on the robot).
+    
+    For a remote connection, change IP and port accordingly in the NAO_IP and NAO_PORT 
+    environment variables.
+  -->
+  
+  <!-- 
+  	This pushes the local PYTHONPATH into the launch file, so that the NaoQI API is found.
+    You need to add the Nao's API dir to your PYTHONPATH so that the modules are found.
+  -->
+  <env name="PYTHONPATH" value="$(env PYTHONPATH)" /> 
+
+  <arg name="nao_ip" default="$(optenv NAO_IP 127.0.0.1)" />
+  <arg name="nao_port" default="$(optenv NAO_PORT 9559)" />
+
+  <node pkg="nao_smach_utils" type="nao_sonar_publisher.py" name="nao_sonar_publisher" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
+  <node pkg="nao_smach_utils" type="emergency_stop.py" name="nao_emergency_stop" output="screen"/>
+
+  </launch>

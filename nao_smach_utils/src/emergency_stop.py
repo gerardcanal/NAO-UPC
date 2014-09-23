@@ -3,8 +3,11 @@ import rospy
 from nao_msgs.msg import TactileTouch, Bumper
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist, Vector3
+from sensor_msgs.msg import Range
 
 ''' Stop the walking of the NAO in case the head button or foot bumpers are pressed '''
+
+USE_SONAR = True
 
 def bumper_callback(data, publisher):
     bumper = 'Left' if data.bumper == data.left else 'Right'
@@ -28,6 +31,14 @@ def tactile_touch_callback(data, publisher):
     else:
         rospy.loginfo('%s button was released. Nothing to do.' % button)
 
+OFFSET = 0.045 # m offset from min_range
+def sonar_cb(data, arg):
+    print data.range, data.min_range+OFFSET
+    if data.range <= data.min_range+OFFSET: 
+        publisher = arg[0]
+        publisher.publish(Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0)));
+        rospy.loginfo('%s sonar detected obstacle at minimum range: %f. Stop message has been sent.' % (arg[1], data.range))
+
 
 if __name__ == '__main__':
     rospy.init_node('NAO_emergency_stop')
@@ -35,6 +46,9 @@ if __name__ == '__main__':
     pub = rospy.Publisher('/cmd_vel', Twist)
     rospy.Subscriber("bumper", Bumper, bumper_callback, callback_args=pub)
     rospy.Subscriber("tactile_touch", TactileTouch, tactile_touch_callback, callback_args=pub)
+    if USE_SONAR:
+        rospy.Subscriber("nao_sonar/right", Range, sonar_cb, callback_args=[pub, 'Right'], queue_size=10)
+        rospy.Subscriber("nao_sonar/left", Range, sonar_cb, callback_args=[pub, 'Left'], queue_size=10)
 
     speak = rospy.Publisher('/speech', String, latch=True)
     speak.publish(String('Emergency Stop has been enabled!'))
