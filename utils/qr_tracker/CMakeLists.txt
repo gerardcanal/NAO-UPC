@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(tomato_tracker)
+project(qr_tracker)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -97,21 +97,24 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(
+	${OpenCV_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a cpp library
-add_library(tomato_tracker src/tomatoTracker.cpp)
+add_library(qr_tracker src/qrTracker.cpp)
 
 ## Declare a cpp executable
-add_executable(tomato_tracker_node src/tomato_tracker_node.cpp)
+add_executable(qr_tracker_node src/qr_tracker_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(tomato_tracker_node tomato_tracker_generate_messages_cpp)
+# add_dependencies(qr_tracker_node qr_tracker_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(tomato_tracker ${OpenCV_LIBRARIES})
-target_link_libraries(tomato_tracker_node tracker ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(qr_tracker ${OpenCV_LIBRARIES})
+target_link_libraries(qr_tracker_node tracker ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -128,7 +131,7 @@ target_link_libraries(tomato_tracker_node tracker ${OpenCV_LIBRARIES} ${catkin_L
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS tomato_tracker tomato_tracker_node
+# install(TARGETS qr_tracker qr_tracker_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -153,7 +156,7 @@ target_link_libraries(tomato_tracker_node tracker ${OpenCV_LIBRARIES} ${catkin_L
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_tomato_tracker.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_qr_tracker.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
