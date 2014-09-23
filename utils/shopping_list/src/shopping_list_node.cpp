@@ -28,7 +28,7 @@ public:
     bool grab(shopping_list::checkObjects::Request &req, shopping_list::checkObjects::Response &res)
     {
 
-      img_in_ = cv::imread("/home/eriba/eclipse_ws/nao_buy_list/Data/scene_07.jpg", cv::IMREAD_COLOR);
+      img_in_ = cv::imread("/home/eriba/catkin_ws/src/NAO-UPC/utils/shopping_list/data/scene_test.jpg", cv::IMREAD_COLOR);
 
       shopList_.process(img_in_);
 
