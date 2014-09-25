@@ -16,7 +16,8 @@
   <arg name="nao_ip" default="$(optenv NAO_IP 127.0.0.1)" />
   <arg name="nao_port" default="$(optenv NAO_PORT 9559)" />
 
-  <node pkg="nao_smach_utils" type="nao_sonar_publisher.py" name="nao_sonar_publisher" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
+  <!-- <node pkg="nao_smach_utils" type="nao_sonar_publisher.py" name="nao_sonar_publisher" required="true" args="- -pip=$(arg nao_ip) - -port=$(arg nao_port)" output="screen"/> OUR CUSTOM SONAR PUBLISHER -->
+  <node pkg="nao_sensors" type="sonar.py" name="nao_sonar_publisher" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
   <node pkg="nao_smach_utils" type="emergency_stop.py" name="nao_emergency_stop" output="screen"/>
 
   </launch>
