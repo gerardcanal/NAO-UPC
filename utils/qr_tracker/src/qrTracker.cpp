@@ -8,7 +8,7 @@ QrTracker::QrTracker()
 void QrTracker::track(Mat frame, int &size_x, int &size_y, string &data, Point2f &p1, Point2f &p2, Point2f &p3, Point2f &p4)
 {
 	Mat frame_grayscale;
-  cvtColor(frame, frame_grayscale, CV_BGR2GRAY);
+  cvtColor(frame, frame_grayscale, COLOR_BGR2HSV);
 
 	// wrap image
 	int width = frame_grayscale.cols;

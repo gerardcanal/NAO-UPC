@@ -85,7 +85,7 @@ find_package(OpenCV REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    #INCLUDE_DIRS include
-   LIBRARIES tracker
+   LIBRARIES tomato_tracker
    CATKIN_DEPENDS cv_bridge image_transport roscpp sensor_msgs std_msgs
    DEPENDS system_lib
 )
@@ -111,7 +111,7 @@ add_executable(tomato_tracker_node src/tomato_tracker_node.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(tomato_tracker ${OpenCV_LIBRARIES})
-target_link_libraries(tomato_tracker_node tracker ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(tomato_tracker_node tomato_tracker ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
 #############
 ## Install ##

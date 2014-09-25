@@ -12,7 +12,7 @@ using namespace std;
 
 #define FONT		FONT_HERSHEY_PLAIN
 #define FONT_COLOR_DATA	Scalar(255,0,255)
-#define LINE_TYPE	CV_AA
+#define LINE_TYPE	0
 #define VIDEOFPS 4
 #define VIDEOPATH "video/object_tracking.avi"
 
@@ -59,7 +59,7 @@ int main(){
         	return -1;
 	}
 
-	namedWindow("Tomatoe", CV_WINDOW_KEEPRATIO);
+	namedWindow("Tomatoe", WINDOW_KEEPRATIO);
 
 	//Frame rate variables
 	time_t start,end;
@@ -74,7 +74,7 @@ int main(){
 		cap >> frame;
 
 		Mat imgHSV;
-		cvtColor(frame, imgHSV, CV_BGR2HSV); //Change the color format from BGR to HSV
+		cvtColor(frame, imgHSV, COLOR_BGR2HSV); //Change the color format from BGR to HSV
 
 		Mat imgThresh = GetThresholdedImage(imgHSV);
 
@@ -91,14 +91,14 @@ int main(){
 		++counterTime;
 		double sec=difftime(end,start);
 		double fps=counterTime/sec;
-		putText(frame, format("FPS: %lf",fps), cvPoint(frame.cols-180, 40), FONT, 2, FONT_COLOR_DATA, 1.5, LINE_TYPE);
+		putText(frame, format("FPS: %lf",fps), Point(frame.cols-180, 40), FONT, 2, FONT_COLOR_DATA, 1.5, LINE_TYPE);
 
 		imshow("Tomatoe", frame);
 		//outputVideo.write(frame);
 		cap >> frame;
 
 		//Wait 80mS
-		int c = cvWaitKey(80);
+		int c = waitKey(80);
 		//If 'ESC' is pressed, break the loop
 		if((char)c==27 ) break;
 	}
