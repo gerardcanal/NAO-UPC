@@ -49,20 +49,20 @@ int main(){
 	}
 
 	namedWindow("Video");
-	namedWindow("Ball", CV_WINDOW_KEEPRATIO);
+	namedWindow("Ball", WINDOW_KEEPRATIO);
 	Mat frame;
 	setTrackbars();
 	//iterate through each frames of the video
 	while(true){
 		cap >> frame;
 		Mat imgHSV;
-		cvtColor(frame, imgHSV, CV_BGR2HSV); //Change the color format from BGR to HSV
+		cvtColor(frame, imgHSV, COLOR_BGR2HSV); //Change the color format from BGR to HSV
 		Mat imgThresh = GetThresholdedImage(imgHSV);
 		imshow("Ball", imgThresh);
 		//imshow("Video", frame);
 
 		//Wait 80mS
-		int c = cvWaitKey(80);
+		int c = waitKey(80);
 		//If 'ESC' is pressed, break the loop
 		if((char)c==27 ) break;
 	}
