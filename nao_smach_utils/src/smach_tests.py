@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import smach
-from speech_state import SpeechState
+from tts_state import SpeechState
 from walk_states import StartWalkingState, StopWalkingState
 from stiffness_states import EnableStiffnessState, DisableStiffnessState
 from geometry_msgs.msg import Twist, Vector3, Pose2D
