@@ -18,7 +18,7 @@ class ShoppingListService
 public:
     ShoppingListService() : it_(nh_), shopList_(nh_)
 	{
-		image_sub_ = it_.subscribe("/image_raw", 1, &ShoppingListService::imageCb, this);
+		image_sub_ = it_.subscribe("/nao_camera/image_raw", 1, &ShoppingListService::imageCb, this);
 		grab_service_ = nh_.advertiseService("/shopping_list/checkObjects", &ShoppingListService::grab, this);
 		//cv::namedWindow("IMAGE");
 	}
@@ -28,7 +28,7 @@ public:
     bool grab(shopping_list::checkObjects::Request &req, shopping_list::checkObjects::Response &res)
     {
 
-      img_in_ = cv::imread("/home/eriba/catkin_ws/src/NAO-UPC/utils/shopping_list/data/scene_test.jpg", cv::IMREAD_COLOR);
+      //img_in_ = cv::imread("/home/eriba/catkin_ws/src/nao/NAO-UPC/utils/shopping_list/data/scene_test.jpg", cv::IMREAD_COLOR);
 
       shopList_.process(img_in_);
 
