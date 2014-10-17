@@ -2,7 +2,9 @@
 import rospy
 import smach
 
+from smach_ros import ServiceState
 from geometry_msgs.msg import Twist
+from std_srvs.srv import Empty
 
 class StartWalkingState(smach.State):
     ''' Make the NAO start Walking '''
@@ -22,8 +24,12 @@ class StartWalkingState(smach.State):
         self._pub.publish(self._twist)
         return 'succeeded'
 
+class StopWalkingState(ServiceState):
+    ''' Stop the walking of the NAO'''
+    def __init__(self):
+        ServiceState.__init__(self, '/stop_walk_srv', Empty)
 
-class StopWalkingState(smach.State):
+class StopWalkingStateVel(smach.State):
     ''' Stop the walking of the NAO'''
     def __init__(self):
         self._pub = rospy.Publisher('/cmd_vel', Twist) # Avoid queue size to force the synchronous message, at least in Hydro

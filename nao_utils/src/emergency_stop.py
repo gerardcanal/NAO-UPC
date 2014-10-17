@@ -9,6 +9,9 @@ from sensor_msgs.msg import Range
 
 USE_SONAR = True
 
+def stop_walking():
+    pass
+
 def bumper_callback(data, publisher):
     bumper = 'Left' if data.bumper == data.left else 'Right'
     if data.state == data.statePressed: # bumper was pressed!!!

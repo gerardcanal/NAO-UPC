@@ -2,14 +2,14 @@
 import rospy
 import smach
 
-from nao_smach_utils.tts_state import SpeechState
-from nao_smach_utils.walk_states import StartWalkingState, StopWalkingState
-from nao_smach_utils.stiffness_states import EnableStiffnessState, DisableStiffnessState
-from nao_smach_utils.execute_choregraphe_behavior_state import ExecuteBehavior
-from nao_smach_utils.footstep_states import FootstepState
-from nao_smach_utils.timeout_state import TimeOutState
-from nao_smach_utils.set_arms_walking_state import SetArmsWalkingState
-from nao_smach_utils.go_to_posture_state import GoToPostureState
+from tts_state import SpeechState
+from walk_states import StartWalkingState, StopWalkingState
+from stiffness_states import EnableStiffnessState, DisableStiffnessState
+from execute_choregraphe_behavior_state import ExecuteBehavior
+from footstep_states import FootstepState
+from timeout_state import TimeOutState
+from set_arms_walking_state import SetArmsWalkingState
+from go_to_posture_state import GoToPostureState
 
 from humanoid_nav_msgs.msg import StepTarget 
 from geometry_msgs.msg import Twist, Vector3, Pose2D
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     with sm:
         smach.StateMachine.add('ENABLE_STIFF', EnableStiffnessState(), transitions={'succeeded': 'POSTUREO'})
         smach.StateMachine.add('POSTUREO', GoToPostureState('StandZero', 0.5), transitions={'succeeded': 'SET_ARMS_WALK'})
-        smach.StateMachine.add('SET_ARMS_WALK', SetArmsWalkingState(False, False), transitions={'succeeded': 'WALK'})
+        smach.StateMachine.add('SET_ARMS_WALK', SetArmsWalkingState(False, True), transitions={'succeeded': 'WALK'})
         smach.StateMachine.add('WALK', StartWalkingState(twistmsg), transitions={'succeeded': 'WAIT'})#, remapping={'velocity': 'twistmsg'})
         smach.StateMachine.add('WAIT', TimeOutState(15), transitions={'succeeded': 'SPEECH'})
         smach.StateMachine.add('SPEECH', SpeechState('Now i will stop walking. Catch me please!'), remapping={'text':'aa'}, transitions={'succeeded': 'STOP'})

@@ -54,7 +54,7 @@
   <run_depend>smach</run_depend>
   <run_depend>smach_ros</run_depend>
   <run_depend>std_msgs</run_depend>
-
+  <run_depend>nao_smach_utils</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
