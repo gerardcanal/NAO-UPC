@@ -20,6 +20,8 @@ class SpeechState(smach.State):
     def execute(self, userdata):
         if (not self._text):
             self._text = userdata.text
-        self._pub.publish(String(self._text))
+        # Try to publish until the publisher is not connected to the topic
+        while self._pub.get_num_connections() == 0:
+            self._pub.publish(String(self._text))
         rospy.loginfo("The published message to say is: %s" % String(self._text).data)
         return 'succeeded'
