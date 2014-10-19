@@ -8,7 +8,6 @@ Author: Edgar Riba
 
 import rospy
 import smach
-from std_msgs.msg import String 
 from geometry_msgs.msg import Pose2D
 
 class MoveToState(smach.State):
@@ -23,7 +22,7 @@ class MoveToState(smach.State):
     Optional parameters:
     @param objective: array with X, Y, Theta.
 
-    Oprional input keys:
+    Optional input keys:
     @param objective: array with X, Y, Theta.
 
     No output keys.
