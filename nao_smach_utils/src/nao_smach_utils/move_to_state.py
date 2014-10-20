@@ -8,10 +8,12 @@ Author: Edgar Riba
 
 import rospy
 import smach
+from smach_ros import ServiceState
+from nao_msgs.srv import CmdPoseService
 from std_msgs.msg import String 
 from geometry_msgs.msg import Pose2D
 
-class MoveToState(smach.State):
+class MoveToState(ServiceState):
 
     '''
     Implementation of SMACH State that makes the NAO to go to a specified objective
@@ -50,21 +52,21 @@ class MoveToState(smach.State):
             input_keys = ['objective']
         else:
             self._objective = Pose2D(objective[0], objective[1], objective[2])
-        self._pub = rospy.Publisher('/cmd_pose', Pose2D, latch=True, queue_size=1)
 
         # Class constructor
-        smach.State.__init__(self, outcomes=['succeeded'], input_keys=input_keys)
+        ServiceState.__init__(self, '/cmd_pose_srv', CmdPoseService, outcomes=['succeeded'], request_cb = self.move_to_request_cb, input_keys=input_keys)
+
+    # Method to define the goal
+    def move_to_request_cb(self, userdata, request):
+        if (not self._objective):
+            self._objective = Pose2D(ud[0], ud[1], ud[2])
+        move_to_request = CmdPoseService()
+        move_to_request.pose = self._objective
+        return move_to_request
 
     # Method to execute the state
     def execute(self, ud):
-        if (not self._objective):
-            self._objective = Pose2D(ud[0], ud[1], ud[2])
-
         rospy.loginfo('Moving to ' + str(self._objective))
-
-        # Try to publish until the publisher is not connected to the topic
-        while self._pub.get_num_connections() == 0:
-            self._pub.publish(self._objective)
         return 'succeeded'
 
 
@@ -72,7 +74,7 @@ class MoveToState(smach.State):
 def main():
 
     # Path to follow
-    objective = [1.0, 0.0, 0.0]
+    objective = [-0.10, 0.0, 0.0]
 
     rospy.init_node('smach_move_to_test')
 
