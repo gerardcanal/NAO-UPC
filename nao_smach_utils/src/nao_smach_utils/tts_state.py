@@ -2,9 +2,38 @@
 import rospy
 import smach
 
-from std_msgs.msg import String 
+from smach_ros import SimpleActionState
+from std_msgs.msg import String
+from nao_msgs.msg import SpeechWithFeedbackAction, SpeechWithFeedbackGoal
 
-class SpeechState(smach.State):
+#Wrapper to the startwalking states for the blocking and non blocking
+def SpeechState(text=None, blocking=True):
+    if not blocking:
+        return SpeechState_NonBlocking(text)
+    else:
+        return SpeechState_Blocking(text)
+
+class SpeechState_Blocking(SimpleActionState):
+    '''Speech state with a call to the ActionServer'''
+    def __init__(self, text=None):
+        ''' If text is used, it will be that text which the robot will say. '''
+        self._text = text
+        input_keys = []
+        if not text:
+            input_keys = ['text']
+
+        # Method to define the goal
+        def tts_request_cb(ud, goal):
+            if (not self._text):
+                self._text = ud.text
+            tts_goal = SpeechWithFeedbackGoal()
+            tts_goal.say = self._text
+            return tts_goal
+
+        SimpleActionState.__init__(self, '/speech_action', SpeechWithFeedbackAction, input_keys=input_keys, goal_cb=tts_request_cb)
+
+
+class SpeechState_NonBlocking(smach.State):
     ''' State which makes the NAO pronunce a speech. '''
 
     def __init__(self, text=None):

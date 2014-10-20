@@ -10,7 +10,7 @@ import rospy
 import smach
 
 from smach_ros import ServiceState
-from nao_msgs.srv import CmdPoseService
+from nao_msgs.srv import CmdPoseService, CmdPoseServiceRequest
 from geometry_msgs.msg import Pose2D
 
 class MoveToState(ServiceState):
@@ -50,6 +50,7 @@ class MoveToState(ServiceState):
         input_keys = []
         if not objective:
             input_keys = ['objective']
+            self._objective = None
         else:
             self._objective = Pose2D(objective[0], objective[1], objective[2])
 
@@ -57,17 +58,17 @@ class MoveToState(ServiceState):
         ServiceState.__init__(self, '/cmd_pose_srv', CmdPoseService, outcomes=['succeeded'], request_cb = self.move_to_request_cb, input_keys=input_keys)
 
     # Method to define the goal
-    def move_to_request_cb(self, userdata, request):
+    def move_to_request_cb(self, ud, request):
         if (not self._objective):
-            self._objective = Pose2D(ud[0], ud[1], ud[2])
-        move_to_request = CmdPoseService()
+            self._objective = Pose2D(ud.objective[0], ud.objective[1], ud.objective[2])
+        move_to_request = CmdPoseServiceRequest()
         move_to_request.pose = self._objective
         return move_to_request
 
     # Method to execute the state
     def execute(self, ud):
-        rospy.loginfo('Moving to ' + str(self._objective))
-        return 'succeeded'
+       rospy.loginfo('Moving to ' + str(self._objective) if self._objective else str(ud.objective))
+       return super(MoveToState, self).execute(ud)
 
 
 # Standalone execution 
@@ -79,11 +80,11 @@ def main():
     rospy.init_node('smach_move_to_test')
 
     sm = smach.StateMachine(outcomes=['succeeded', 'preempted', 'aborted'])
-
+    sm.userdata.objective = [0.3, 0.0, 0.0]
     with sm:
 
         smach.StateMachine.add('MOVE_TO',
-                                MoveToState(objective),
+                                MoveToState(),
                                 transitions={'succeeded': 'succeeded'})
 
         # Execute the state machine
