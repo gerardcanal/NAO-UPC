@@ -9,48 +9,52 @@ from std_srvs.srv import Empty
 ''' Stop the walking of the NAO in case the head button or foot bumpers are pressed '''
 
 USE_SONAR = True
+emergency_stop_publisher = None
 
 
-def stop_walking(stop_method):
+def stop_walking(stop_method, who):
     if isinstance(stop_method, rospy.ServiceProxy): # Service call
         stop_method()
     else: # Publish cal
         stop_method.publish(Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0)))
+    emergency_stop_publisher.publish("Emergency stop has stopped the robot walk because of %s!" % who)
 
 def bumper_callback(data, stop_method):
-    bumper = 'Left' if data.bumper == data.left else 'Right'
+    bumper = 'Left bumper' if data.bumper == data.left else 'Right bumper'
     if data.state == data.statePressed: # bumper was pressed!!!
-        stop_walking(stop_method)
-        rospy.loginfo('%s bumper was pressed! Stop message has been sent.' % bumper)
+        stop_walking(stop_method, bumper)
+        rospy.loginfo('%s was pressed! Stop message has been sent.' % bumper)
     else:
-        rospy.loginfo('%s bumper was released. Nothing to do.' % bumper)
+        rospy.loginfo('%s was released. Nothing to do.' % bumper)
 
 def tactile_touch_callback(data, stop_method):
     if data.button == data.buttonFront:
-        button = 'Front'
+        button = 'Front button'
     elif data.button == data.buttonMiddle:
-        button = 'Middle'
+        button = 'Middle button'
     else:
-        button = 'Rear'
+        button = 'Rear button'
 
     if data.state == data.statePressed:
         stop_walking(stop_method)
-        rospy.loginfo('%s button was pressed! Stop message has been sent.' % button)
+        rospy.loginfo('%s was pressed! Stop message has been sent.' % button)
     else:
-        rospy.loginfo('%s button was released. Nothing to do.' % button)
+        rospy.loginfo('%s was released. Nothing to do.' % button)
 
 OFFSET = 0.045 # m offset from min_range
 def sonar_cb(data, arg):
     #print data.range, data.min_range+OFFSET
     if data.range <= data.min_range+OFFSET: 
         stop_method = arg[0]
-        stop_walking(stop_method)
+        stop_walking(stop_method, arg[1] + ' sonar')
         rospy.loginfo('%s sonar detected obstacle at minimum range: %f. Stop message has been sent.' % (arg[1], data.range))
 
 
 if __name__ == '__main__':
+    global emergency_stop_publisher
     rospy.init_node('NAO_emergency_stop')
     rospy.loginfo('STARTING EMERGENCY STOP NODE...')
+    emergency_stop_publisher = rospy.Publisher('/emergency_stop', String, queue_size=5)
 
     try:
         rospy.wait_for_service('/stop_walk_srv', timeout=3.0)# wait as 3 s much
