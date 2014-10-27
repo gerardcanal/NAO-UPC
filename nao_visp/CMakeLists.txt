@@ -8,7 +8,8 @@ find_package(catkin REQUIRED COMPONENTS
   nao_driver
   nao_sensors
   std_msgs
-  vision_visp
+  visp_camera_calibration
+  visp_auto_tracker
 )
 
 ## System dependencies are found with CMake's conventions
