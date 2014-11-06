@@ -33,7 +33,7 @@ if __name__ == "__main__":
             return StepTarget(leg=0, pose=Pose2D(0.0, -1.0, 0.0))
         smach.StateMachine.add('FOOTSTEP', FootstepState(request_cb=callback), transitions={'succeeded': 'WAIT_STOP'})
         #smach.StateMachine.add('EXECUTE_BEHAVIOUR', ExecuteBehavior('firstgraspTest'))
-        smach.StateMachine.add('EXECUTE_BEHAVIOUR', ExecuteBehavior('firstgraspTest'), transitions={'succeeded': 'WAIT_STOP'})
+        #smach.StateMachine.add('EXECUTE_BEHAVIOUR', ExecuteBehavior('firstgraspTest'), transitions={'succeeded': 'WAIT_STOP'})
         smach.StateMachine.add('WAIT_STOP', TimeOutState(1), transitions={'succeeded': 'CROUCH'})
         smach.StateMachine.add('CROUCH', GoToPostureState('Crouch', 0.5), transitions={'succeeded': 'DISABLE_STIFF'})
         smach.StateMachine.add('DISABLE_STIFF', DisableStiffnessState())
