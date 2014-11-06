@@ -79,7 +79,7 @@ class SquareDetector:
         # Image Processing
         squares = self.find_squares(cv_image)
 
-        # Founds up to 1 square
+        # Found up to 1 square
         if len(squares) > 0:
             # compute centroid
             M = cv2.moments(squares[0])
