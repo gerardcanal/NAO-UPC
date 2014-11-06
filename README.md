@@ -11,15 +11,13 @@ Repository for nao code development. The goal is to develop 3 tests:
 
   https://github.com/Itseez/opencv
 
-  ROS do not support OpenCV 3.0, so you need a modified version of `vision_opencv(cv_bridge)` and `image_pipeline`.
+  ROS do not support OpenCV 3.0, so you need a modified version of `vision_opencv(cv_bridge)`.
 
   https://github.com/mikejmills/vision_opencv
 
-  https://github.com/edgarriba/image_pipeline
-
   With this new repositories, you must uninstall this precompiled respositories:
   ```bash
-  sudo apt-get autoremove ros-indigo-cv-bridge ros-indigo-image-pipeline
+  sudo apt-get autoremove ros-hydro-cv-bridge
   ```
   
   Probably, with this command `rqt_image_view` will be uninstalled or simply won't work. Until now, I haven't found the public code to modify it.
