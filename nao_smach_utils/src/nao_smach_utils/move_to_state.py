@@ -10,7 +10,7 @@ import rospy
 import smach
 from smach_ros import ServiceState
 from nao_msgs.srv import CmdPoseService
-from std_msgs.msg import String 
+from std_msgs.msg import String
 from geometry_msgs.msg import Pose2D
 
 class MoveToState(ServiceState):
@@ -25,7 +25,7 @@ class MoveToState(ServiceState):
     Optional parameters:
     @param objective: array with X, Y, Theta.
 
-    Oprional input keys:
+    Optional input keys:
     @param objective: array with X, Y, Theta.
 
     No output keys.
@@ -57,7 +57,7 @@ class MoveToState(ServiceState):
         ServiceState.__init__(self, '/cmd_pose_srv', CmdPoseService, outcomes=['succeeded'], request_cb = self.move_to_request_cb, input_keys=input_keys)
 
     # Method to define the goal
-    def move_to_request_cb(self, userdata, request):
+    def move_to_request_cb(self, ud, request):
         if (not self._objective):
             self._objective = Pose2D(ud[0], ud[1], ud[2])
         move_to_request = CmdPoseService()
