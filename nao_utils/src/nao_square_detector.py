@@ -9,6 +9,7 @@ Author: Edgar Riba
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
+from geometry_msgs.msg import Point
 from cv_bridge import CvBridge, CvBridgeError
 
 import numpy as np
@@ -45,7 +46,7 @@ class SquareDetector:
     def __init__(self, subs_topic='/image_raw', debug=False):
         self.image_sub = rospy.Subscriber(subs_topic, Image, self.callback)
         self.image_pub = rospy.Publisher(subs_topic+'_processed', Image, queue_size=10)
-        # TODO: self.pose_pub = rospy.Publisher('/nao_square_detector', Pose2D, queue_size=10)
+        self.pose_pub = rospy.Publisher('/nao_square', Point, queue_size=10)
         self.bridge = CvBridge()
         self.debug = debug
         if self.debug: cv2.namedWindow("Image window", 1)
@@ -86,7 +87,8 @@ class SquareDetector:
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
             
-            # TODO: publish to a topic
+            # publish to a topic
+            self.pose_pub.publish(Point(cx,cy,0))
 
             if self.debug: 
                 # Draw info
