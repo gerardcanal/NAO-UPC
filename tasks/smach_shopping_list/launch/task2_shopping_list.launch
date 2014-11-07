@@ -1,0 +1,6 @@
+<launch>
+
+    <node name="smach_shopping_list" pkg="smach_shopping_list" type="smach_shopping_list.py" output="screen" />
+    <include file="$(find shopping_list)/launch/shopping_list_server_AKAZE.launch" />
+
+</launch>
