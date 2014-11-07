@@ -50,7 +50,7 @@ class SpeechState_NonBlocking(smach.State):
         if (not self._text):
             self._text = userdata.text
         # Try to publish until the publisher is not connected to the topic
-        while self._pub.get_num_connections() == 0:
-            self._pub.publish(String(self._text))
+        #while self._pub.get_num_connections() == 0:
+        self._pub.publish(String(self._text))
         rospy.loginfo("The published message to say is: %s" % String(self._text).data)
         return 'succeeded'

@@ -112,7 +112,7 @@ class SquareDetector:
             print e
 
 def main():
-    sq = SquareDetector(subs_topic='/image_raw', debug=True)
+    sq = SquareDetector(subs_topic='/nao_camera/image_raw', debug=True)
     rospy.init_node('square_detector', anonymous=True)
     try:
         rospy.spin()

@@ -51,8 +51,10 @@ class MoveToState(ServiceState):
         if not objective:
             input_keys = ['objective']
             self._objective = None
-        else:
+        elif not isinstance(objective, Pose2D):
             self._objective = Pose2D(objective[0], objective[1], objective[2])
+        else:
+            self._objective = objective
 
         # Class constructor
         ServiceState.__init__(self, '/cmd_pose_srv', CmdPoseService, outcomes=['succeeded'], request_cb = self.move_to_request_cb, input_keys=input_keys)
