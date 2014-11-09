@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>shopping_list</name>
+  <name>nao_shopping_list</name>
   <version>0.0.0</version>
   <description>The shopping_list package</description>
 

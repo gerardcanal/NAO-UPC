@@ -1,0 +1,14 @@
+<launch>
+
+  <param name="path_to_objects_models" type="str" value="$(find nao_shopping_list)/data/objects_models_AKAZE.yml" />
+  <param name="path_to_objects_raw" type="str" value="$(find nao_shopping_list)/data/objects_raw.yaml" />
+  <param name="path_to_data" type="str" value="$(find nao_shopping_list)/data/" />
+  <param name="detector_type" value="AKAZE" type="str" />
+  <param name="akaze_threshold" value="3e-4" type="double" />
+  <param name="ransac_threshold" value="5.0" type="double" />
+  <param name="nn_match_ratio" value="0.65" type="double" />
+  <param name="bb_min_inliers" value="10" type="int" />
+
+  <node name="nao_shopping_list_node" pkg="nao_shopping_list" type="nao_shopping_list_node" output="screen" />
+
+</launch>

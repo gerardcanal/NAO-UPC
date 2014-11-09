@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(shopping_list)
+project(nao_shopping_list)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -59,6 +59,7 @@ find_package(catkin REQUIRED
  add_service_files(
    FILES
    checkObjects.srv
+   trainObjects.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -108,16 +109,14 @@ include_directories(
 # )
 
 ## Declare a cpp executable
- add_executable(shopping_list_node src/shopping_list_node.cpp)
- add_executable(test_features_node src/test_features_node.cpp)
+ add_executable(nao_shopping_list_node src/nao_shopping_list_node.cpp src/ShoppingList.cpp)
  
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(shopping_list_node shopping_list_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries( shopping_list_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} )
- target_link_libraries( test_features_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} )
+ target_link_libraries( nao_shopping_list_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} )
  
 #############
 ## Install ##

@@ -87,19 +87,19 @@ int main()
   for (int i = 0; i < N; ++i) {
 
     map_name = "Sample" + IntToString(i);
-	fs << map_name << "{";
+  	fs << map_name << "{";
 
-	fs << "objectId" << i;
-	fs << "imageRows" << images_objects[i].rows;
-	fs << "imageCols" << images_objects[i].cols;
+  	fs << "objectId" << i;
+  	fs << "imageRows" << images_objects[i].rows;
+  	fs << "imageCols" << images_objects[i].cols;
 
-	std::vector<cv::Point2f> keypoints_pt;
-	for (int j = 0; j < keypoints_objects[i].size(); ++j)keypoints_pt.push_back(keypoints_objects[i][j].pt);
+  	std::vector<cv::Point2f> keypoints_pt;
+  	for (int j = 0; j < keypoints_objects[i].size(); ++j)keypoints_pt.push_back(keypoints_objects[i][j].pt);
 
-	fs << "keypoints" << cv::Mat(keypoints_pt);
-	fs << "descriptors" << descriptors_objects[i];
+  	fs << "keypoints" << cv::Mat(keypoints_pt);
+  	fs << "descriptors" << descriptors_objects[i];
 
-	fs << "}";
+  	fs << "}";
   }
 
   fs.release();

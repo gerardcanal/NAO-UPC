@@ -69,6 +69,12 @@ class RobustMatcher {
 	  ratio= r;
 	}
 
+	// Compute the keypoints and the descriptors of a given image
+	void computeKeyPointsAndDescriptors( const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints, cv::Mat& descriptors)
+	{
+		(*detector_)(image, cv::noArray(), keypoints, descriptors);
+	}
+
 	// Add models descriptors and train matcher
 	void trainMatcher(const std::vector<cv::Mat>& descriptors_objects) {
 		matcher_->add(descriptors_objects);
@@ -88,21 +94,16 @@ class RobustMatcher {
 
 			// if 2 NN has been identified
 			if (matchIterator->size() > 1) {
-
 				// check distance ratio
 				if ((*matchIterator)[0].distance/(*matchIterator)[1].distance > ratio) {
-
-					 matchIterator->clear(); // remove match
-					 removed++;
+					matchIterator->clear(); // remove match
+					removed++;
 				}
-
 			} else { // does not have 2 neighbours
-
 				matchIterator->clear(); // remove match
 				removed++;
 			}
 		}
-
 	return removed;
     }
 
