@@ -33,15 +33,16 @@ public:
 	/*  Service to grab the current image camera and check the objects */
 	bool grab(nao_shopping_list::checkObjects::Request &req, nao_shopping_list::checkObjects::Response &res)
 	{
-
-		//img_in_ = cv::imread("/home/eriba/catkin_ws/src/nao/NAO-UPC/utils/shopping_list/data/scene_test.jpg", cv::IMREAD_COLOR);
-
+		// process the current image
 		shopList_.process(img_in_);
 
-		vector<int> result = shopList_.getResult();
-		res.num_objects = result.size();
-		for (size_t i = 0; i < result.size(); ++i) res.shopping_list.push_back(result[i]);
-
+		std::vector<std::pair<int, std::string> > results = shopList_.getResults();
+		res.num_objects = results.size();
+		for (size_t i = 0; i < results.size(); ++i)
+		{
+			res.ids.push_back(results[i].first);
+			res.names.push_back(results[i].second);
+		}
 		return true;
 	}
 
@@ -50,6 +51,7 @@ public:
 	{
 
 		cout << "Training the objects ..." << endl;
+		// load the data and train
 		shopList_.trainData();
 		cout << "Training the objects OK" << endl;
 		return true;

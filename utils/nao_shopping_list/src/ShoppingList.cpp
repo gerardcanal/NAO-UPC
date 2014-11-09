@@ -37,7 +37,6 @@ void ObjectsBag::clearData()
 ShoppingList::ShoppingList(const ros::NodeHandle& nh)
 {
 	// load ROS srver parameters
-    nh.getParam("path_to_objects_models", path_to_objects_models_);
     nh.getParam("path_to_objects_raw", path_to_objects_raw_);
     nh.getParam("path_to_data", path_to_data_);
     nh.getParam("detector_type", detector_type_);
@@ -112,7 +111,7 @@ void ShoppingList::trainData()
 void ShoppingList::process(const cv::Mat& img_in)
 {
     // Clear previous results
-    result_.clear();
+    results_.clear();
 
     // Descriptors Matching
     std::vector<cv::DMatch> good_matches;
@@ -122,8 +121,9 @@ void ShoppingList::process(const cv::Mat& img_in)
     // Getting the number of samples
     int N = objectsBag_.getTotalNumSamples();
 
-    // Getting the objects ids
+    // Getting the objects ids and names
     std::vector<int> ids = objectsBag_.getIds();
+	std::vector<std::string> names = objectsBag_.getNames();
 
     // Getting the objects models keypoints
     std::vector<std::vector<cv::KeyPoint> > keypoints_objects = objectsBag_.getKeyPoints();
@@ -175,11 +175,9 @@ void ShoppingList::process(const cv::Mat& img_in)
 		std::cout << "Num inliers: " << num_inliers                              << std::endl;
 		std::cout << "Ratio matches: " << ratio_matches << " %"                  << std::endl;
 
-		if(obj_found)
-		{			
-			// save the results
-			result_.push_back(ids[i]);
-		}
+		// save the results
+		if(obj_found) results_.push_back( std::make_pair(ids[i], names[i]) );
+
 		else continue;
     }
 }

@@ -5,7 +5,7 @@
 #include <ros/ros.h>
 // C/C++ headers
 #include <iostream>
-#include <cassert>
+#include <utility>  // std::pair
 // OpenCV headers
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
@@ -56,7 +56,7 @@ public:
     ~ShoppingList() {}
 
     // Getter methods
-    std::vector<int> getResult() const { return result_; }
+    std::vector<std::pair<int, std::string> > getResults() const { return results_; }
 
     // Public methods
     void trainData();
@@ -68,11 +68,9 @@ private:
     /* Objects models information */
     ObjectsBag objectsBag_;
     /* The result to embed the solution */
-    std::vector<int> result_;
+    std::vector<std::pair<int, std::string> > results_;
     /* Type of features detector */
     std::string detector_type_;
-    /* Path to the objects models file */
-    std::string path_to_objects_models_;
     /* Path to the objects models raw info */
     std::string path_to_objects_raw_;
     /* Path to the raw data */
