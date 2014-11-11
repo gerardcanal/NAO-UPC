@@ -11,6 +11,7 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Point
 from cv_bridge import CvBridge, CvBridgeError
+from tf.transformations import euler_from_matrix
 
 import numpy as np
 import cv2
@@ -46,7 +47,7 @@ class SquareDetector:
         self.poseEst = PoseEstimator()
         if self.debug: cv2.namedWindow("Image window", 1)
 
-    def getSquare():
+    def getSquare(self):
         return self.square
 
     def angle_cos(self, p0, p1, p2):
@@ -159,18 +160,20 @@ class PoseEstimator:
                                 [0, 0.0395, -0.0395] ])  # centroid
 
         self.tag2D = None
-        self.K = np.array([ [866.89959,                 0, 298.89661],  # calibration matrix
-                            [        0, 858.4112699999999, 197.89565],
-                            [        0,                 0,        1] ])
-        self.distCoef = np.array([-0.25655, 0, 0, 0, 0])                # distortion coeficient vector
+        self.K = np.array([ [767.225825,          0, 332.55728],  # calibration matrix
+                            [         0, 768.281075, 211.85425],
+                            [        0,           0,         1] ])
+        self.distCoef = np.array([0.262785, -0.9941939999999999, 0.001014, 0.002283, 0])                # distortion coeficient vector
         
     def computePose(self, tag2D):
         self.tag2D = np.array(tag2D).astype(np.float)
 
         # SolvePnP function --> estimates rotation and translation vector
         retval, rvec, tvec = cv2.solvePnP(self.tag3D, self.tag2D, self.K, self.distCoef, flags=cv2.SOLVEPNP_ITERATIVE)
+        print 'rvec:', rvec
         # Transform rotation vector to matrix
         dst, jacobian = cv2.Rodrigues(rvec)
+        print [x * 180 / np.pi for x in euler_from_matrix(dst)]
         
         # Compute Euler angles from rotation matrix
         yaw   = np.arctan(dst[1][0] / dst[0][0]) * 180 / np.pi      # alpha = atan^-1(r21/r11)
