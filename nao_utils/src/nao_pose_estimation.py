@@ -116,12 +116,14 @@ class SquareDetector:
                 # Draw info
                 cv2.drawContours(cv_image, squares, -1, (0,255,0), 3 )
 
-                cv2.circle(cv_image, (square[0][0], square[0][1]), 5, (0, 255, 0))   # top-left
-                cv2.circle(cv_image, (square[1][0], square[1][1]), 5, (0, 255, 0))   # bottom-left
-                cv2.circle(cv_image, (square[2][0], square[2][1]), 5, (0, 255, 0))   # bottom-right
-                cv2.circle(cv_image, (square[3][0], square[3][1]), 5, (0, 255, 0))   # top-right
-                cv2.circle(cv_image, (cx, cy), 5, 1)                                 # centroid
+            	# inner square
+                cv2.circle(cv_image, (squares[0][0][0], squares[0][0][1]), 5, (0, 255, 0))   # top-left
+                cv2.circle(cv_image, (squares[0][1][0], squares[0][1][1]), 5, (0, 255, 0))   # bottom-left
+                cv2.circle(cv_image, (squares[0][2][0], squares[0][2][1]), 5, (0, 255, 0))   # bottom-right
+                cv2.circle(cv_image, (squares[0][3][0], squares[0][3][1]), 5, (0, 255, 0))   # top-right
+                cv2.circle(cv_image, (cx, cy), 5, 1)                                         # centroid
 
+                # outter square
                 if len(squares) > 1:
 	                cv2.circle(cv_image, (squares[1][0][0], squares[1][0][1]), 5, (255, 0, 0))   # top-left
 	                cv2.circle(cv_image, (squares[1][1][0], squares[1][1][1]), 5, (255, 0, 0))   # bottom-left
@@ -164,20 +166,36 @@ class PoseEstimator:
     '''
 
     def __init__(self):
-        #                        x       y        z
-        self.tag3D = np.array([ [0,      0,       0],    # top-left
-                                [0,      0, -0.0790],    # bottom-left
-                                [0, 0.0790, -0.0790],    # bottom-right
-                                [0, 0.0790,       0],    # top-right
-                                [0, 0.0395, -0.0395] ])  # centroid
-
+        #  one square              x       y        z
+        self._tag3D1 = np.array([ [0, -0.0390,  0.0390],    # [INNER] top-left
+                                  [0, -0.0390, -0.0390],    # [INNER] bottom-left
+                                  [0,  0.0390, -0.0390],    # [INNER] bottom-right
+                                  [0,  0.0390,  0.0390],    # [INNER] top-right
+                                  [0,       0,       0] ])  # [INNER] centroid
+        # two squares
+        self._tag3D2 = np.array([ [0, -0.0390,  0.0390],    # [INNER] top-left
+                                  [0, -0.0390, -0.0390],    # [INNER] bottom-left
+                                  [0,  0.0390, -0.0390],    # [INNER] bottom-right
+                                  [0,  0.0390,  0.0390],    # [INNER] top-right
+                                  [0,       0,       0],    # [INNER] centroid
+                                  [0, -0.0790,  0.0790],    # [OUTTER] top-left
+                                  [0,  0.0790,  0.0790],    # [OUTTER] top-right
+                                  [0,  0.0790, -0.0790],    # [OUTTER] bottom-right
+                                  [0, -0.0790  -0.0790] ])  # [OUTTER] bottom-left
         self.tag2D = None
+        self.tag3D = None
         self.K = np.array([ [767.225825,          0, 332.55728],  # calibration matrix
                             [         0, 768.281075, 211.85425],
                             [        0,           0,         1] ])
         self.distCoef = np.array([0.262785, -0.9941939999999999, 0.001014, 0.002283, 0])                # distortion coeficient vector
         
     def computePose(self, tag2D):
+        # check tag2D num points
+        if len(tag2D) <= 5:
+            self.tag3D = self._tag3D1
+        else:
+        	self.tag3D = self._tag3D2
+        # convert to float
         self.tag2D = np.array(tag2D).astype(np.float)
 
         # SolvePnP function --> estimates rotation and translation vector
