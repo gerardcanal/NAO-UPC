@@ -40,8 +40,9 @@ class SquareDetector:
 
     def __init__(self, subs_topic='/image_raw', debug=False):
         self.image_sub = rospy.Subscriber(subs_topic, Image, self.callback)
-        self.image_pub = rospy.Publisher(subs_topic+'_processed', Image, queue_size=10)
-        #self.pose_pub = rospy.Publisher('/nao_square', Point, queue_size=10)
+        if debug:
+            self.image_pub = rospy.Publisher(subs_topic+'_processed', Image, queue_size=10)
+        self.pose_pub = rospy.Publisher('/nao_square', Point, queue_size=10)
         self.bridge = CvBridge()
         self.debug = debug
         self.poseEst = PoseEstimator()
@@ -104,10 +105,10 @@ class SquareDetector:
 				tag = np.vstack((tag, square))
 
             # compute camera pose
-            self.poseEst.computePose(tag)
+            pose = self.poseEst.computePose(tag)
 
             # publish pose to a topic
-            #self.pose_pub.publish(Point(cx,cy,0))
+            self.pose_pub.publish(Point(pose[0],pose[1],pose[2]))
 
             if self.debug: 
                 # Print info
@@ -173,15 +174,16 @@ class PoseEstimator:
                                   [0,  0.0390,  0.0390],    # [INNER] top-right
                                   [0,       0,       0] ])  # [INNER] centroid
         # two squares
-        self._tag3D2 = np.array([ [0, -0.0390,  0.0390],    # [INNER] top-left
-                                  [0, -0.0390, -0.0390],    # [INNER] bottom-left
-                                  [0,  0.0390, -0.0390],    # [INNER] bottom-right
-                                  [0,  0.0390,  0.0390],    # [INNER] top-right
-                                  [0,       0,       0],    # [INNER] centroid
+        self._tag3D2 = np.array([ [0.01, -0.0390,  0.0390],    # [INNER] top-left
+                                  [0.01, -0.0390, -0.0390],    # [INNER] bottom-left
+                                  [0.01,  0.0390, -0.0390],    # [INNER] bottom-right
+                                  [0.01,  0.0390,  0.0390],    # [INNER] top-right
+                                  [0.01,       0,       0],    # [INNER] centroid
                                   [0, -0.0790,  0.0790],    # [OUTTER] top-left
                                   [0,  0.0790,  0.0790],    # [OUTTER] top-right
                                   [0,  0.0790, -0.0790],    # [OUTTER] bottom-right
-                                  [0, -0.0790  -0.0790] ])  # [OUTTER] bottom-left
+                                  [0, -0.0790,  -0.0790] ])  # [OUTTER] bottom-left
+
         self.tag2D = None
         self.tag3D = None
         self.K = np.array([ [767.225825,          0, 332.55728],  # calibration matrix
@@ -218,7 +220,7 @@ class PoseEstimator:
         print tvec
 
         # TODO: return the above info [x, y, yaw]
-        # return [tvec[0], tvec[1], yaw] or Pose2D
+        return tvec
 
 def main():
     sq = SquareDetector(subs_topic='/nao_camera/image_raw', debug=True)

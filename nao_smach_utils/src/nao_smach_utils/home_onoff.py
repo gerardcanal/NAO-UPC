@@ -6,13 +6,13 @@ from go_to_posture_state import GoToPostureState
 
 class HomeOn_SM(StateMachine):
 
-    def __init__(self):
+    def __init__(self, startPose='StandInit'):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
 
         with self:
-            StateMachine.add('ENABLE_STIFF', EnableStiffnessState(), transitions={'succeeded': 'STAND_INIT_POSE'})
+            StateMachine.add('ENABLE_STIFF', EnableStiffnessState(), transitions={'succeeded': 'START_POSITION'})
 
-            StateMachine.add('STAND_INIT_POSE', GoToPostureState('StandInit', 0.5), transitions={'succeeded': 'succeeded'})
+            StateMachine.add('START_POSITION', GoToPostureState(startPose, 0.5), transitions={'succeeded': 'succeeded'})
 
 class HomeOff_SM(StateMachine):
 

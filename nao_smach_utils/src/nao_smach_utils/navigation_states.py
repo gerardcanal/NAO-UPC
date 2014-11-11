@@ -5,10 +5,11 @@ from geometry_msgs.msg import Point, Pose2D
 from move_to_state import MoveToState
 from tts_state import SpeechState
 from home_onoff import HomeOn_SM, HomeOff_SM
+from smach import CBState
 import math
 
 class FindSquare(StateMachine):
-
+    ''' Goes around until it finds the square '''
     def __init__(self, angle=math.pi/4):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'], output_keys=['square']) 
 
@@ -22,6 +23,26 @@ class FindSquare(StateMachine):
             StateMachine.add('SPEAK_F', SpeechState(text=text, blocking=False), transitions={'succeeded':'succeeded'})
 
             StateMachine.add('TURN_AROUND', MoveToState(objective=Pose2D(0.1, 0, angle)), transitions={'succeeded':'FIND_SQUARE'})
+
+class GoToSquare(StateMachine):
+     def __init__(self, dist_m_to_square=0.15, min_x_dist=0.25):
+        StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
+        self.ALMOST_ZERO = 0.005
+
+        with self:
+            StateMachine.add('FIND_SQUARE', FindSquare(), transitions={'succeeded': 'PREPARE_OBJ'}, remapping={'square': 'square'})
+            def put_obj(ud):
+                x_mov = min(min_x_dist, abs(ud.square.z)-dist_m_to_square)
+                print ud.square, x_mov
+                if x_mov <= self.ALMOST_ZERO and ud.square.x <= self.ALMOST_ZERO:
+                    return 'reached'
+                ud.objective = Pose2D(x_mov, -ud.square.x, 0.0)
+                return 'succeeded'
+            StateMachine.add('PREPARE_OBJ', CBState(put_obj, outcomes=['succeeded', 'reached'], input_keys=['square'], output_keys=['objective']),
+                              transitions={'succeeded':'MOVE_TO_SQ', 'reached': 'SAY_REACHED'}, remapping={'objective': 'objective'})
+            StateMachine.add('MOVE_TO_SQ', MoveToState(), transitions={'succeeded': 'FIND_SQUARE'}, remapping={'objective': 'objective'})
+            StateMachine.add('SAY_REACHED', SpeechState(text='I am ready to something!', blocking=False), transitions={'succeeded': 'succeeded'})
+
 
 
 class ReadTopicSquare(State):
