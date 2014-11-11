@@ -84,17 +84,24 @@ class SquareDetector:
 
             # assuming that's the correct tag
             # TODO: check which it's the correct tag
-            square = squares[0]
+            #square = squares[0]
 
             # compute centroid
-            M = cv2.moments(square)
+            M = cv2.moments(squares[0])
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
 
+            # add inner square
+            square = np.array(squares[0])
+
             # add centroid to square
-            square = np.array(square)
             centroid = np.array([cx, cy])
             tag = np.vstack((square, centroid))
+
+            if len(squares) > 1:
+				# add outter square
+				square = np.array(squares[1])
+				tag = np.vstack((tag, square))
 
             # compute camera pose
             self.poseEst.computePose(tag)
@@ -115,6 +122,11 @@ class SquareDetector:
                 cv2.circle(cv_image, (square[3][0], square[3][1]), 5, (0, 255, 0))   # top-right
                 cv2.circle(cv_image, (cx, cy), 5, 1)                                 # centroid
 
+                if len(squares) > 1:
+	                cv2.circle(cv_image, (squares[1][0][0], squares[1][0][1]), 5, (255, 0, 0))   # top-left
+	                cv2.circle(cv_image, (squares[1][1][0], squares[1][1][1]), 5, (255, 0, 0))   # bottom-left
+	                cv2.circle(cv_image, (squares[1][2][0], squares[1][2][1]), 5, (255, 0, 0))   # bottom-right
+	                cv2.circle(cv_image, (squares[1][3][0], squares[1][3][1]), 5, (255, 0, 0))   # top-right
         else:
             if self.debug: print 'Square not found'
 
