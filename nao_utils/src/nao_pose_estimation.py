@@ -78,6 +78,12 @@ class SquareDetector:
     def getSquare(self):
         return self.square
 
+    def equalLength(self, cnt):
+        x,y,w,h = cv2.boundingRect(cnt)
+        aspect_ratio = float(w)/h
+        EPSILON = 0.10
+        return True if (aspect_ratio>1-EPSILON and aspect_ratio<1+EPSILON) else False
+
     def angle_cos(self, p0, p1, p2):
         d1, d2 = (p0-p1).astype('float'), (p2-p1).astype('float')
         return abs( np.dot(d1, d2) / np.sqrt( np.dot(d1, d1)*np.dot(d2, d2) ) )
@@ -94,7 +100,7 @@ class SquareDetector:
             if len(cnt) == 4 and cv2.contourArea(cnt) > 1000 and cv2.isContourConvex(cnt):
                 cnt = cnt.reshape(-1, 2)
                 max_cos = np.max([self.angle_cos( cnt[i], cnt[(i+1) % 4], cnt[(i+2) % 4] ) for i in xrange(4)])
-                if max_cos < 0.1:
+                if max_cos < 0.1 and self.equalLength(cnt):
                     squares.append(cnt)
         return squares
 
@@ -106,6 +112,8 @@ class SquareDetector:
 
         # Image Processing
         squares = self.find_squares(cv_image)
+
+        print 'len(squares)', len(squares)
 
         # Found up to 1 square
         if len(squares) > 0:
@@ -127,16 +135,18 @@ class SquareDetector:
 
             # compute square mean value
             r = cv2.boundingRect(square)
-            img_roi = cv_image[r[1]:r[1]+r[3], r[0]:r[0]+r[2]]
+            img_roi = cv_image[r[1]:r[1]+r[3], r[0]:r[0]+r[2]/4]
             mean = cv2.mean(cv2.mean(img_roi))[0]
+            print 'mean', mean
 
             # check if the tag is big or small
-            # TODO: check this thrs
-            thrs = 150
-            if mean < thrs:
+            # TODO: calibrate this threshold
+            thrs = 100
+            if mean > thrs:
                 tag_type = 'small'
             else:
                 tag_type = 'big'
+
 
             # Found two squares
             if len(squares) > 1:
@@ -145,9 +155,11 @@ class SquareDetector:
                 # add outter square
                 square = np.array(squares[1])
                 tag = np.vstack((tag, square))
+                # we consider that are coming both tag squares
+                tag_type = 'both'
 
             # compute camera pose
-            pose = self.poseEst.computePose(tag, 'small')
+            pose = self.poseEst.computePose(tag, tag_type)
 
             # publish pose to a topic
             self.pose_pub.publish(Point(pose[0],pose[1],pose[2]))
@@ -182,6 +194,7 @@ class SquareDetector:
         if self.debug:
             try:
                 self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+                print '-------------------------------------------------'
             except CvBridgeError, e:
                 print e
 
@@ -230,9 +243,9 @@ class PoseEstimator:
                                   [0.01,       0,       0],   # [INNER] centroid
                                   #TODO: check this order
                                   [0,    -0.0790,  0.0790],   # [OUTTER] top-left
-                                  [0,     0.0790,  0.0790],   # [OUTTER] top-right
+                                  [0,    -0.0790, -0.0790],   # [OUTTER] top-right
                                   [0,     0.0790, -0.0790],   # [OUTTER] bottom-right
-                                  [0,    -0.0790, -0.0790] ]) # [OUTTER] bottom-left
+                                  [0,     0.0790,  0.0790] ]) # [OUTTER] bottom-left
 
         self.tag2D = None
         self.tag3D = None
@@ -273,7 +286,7 @@ class PoseEstimator:
             self.tag3D = self._tag3D1
         elif tag_type is 'big':
             self.tag3D = self._tag3D2
-        else:
+        elif tag_type is 'both':
             self.tag3D = self._tag3D3
 
         # convert to float
@@ -289,7 +302,7 @@ class PoseEstimator:
         print [x * 180 / np.pi for x in euler_from_matrix(dst)]
 
         # compute lines orientation
-        theta = self.computeOrientation(self.tag2D)
+        #theta = self.computeOrientation(self.tag2D)
         
         # Compute Euler angles from rotation matrix
         yaw   = np.arctan(dst[1][0] / dst[0][0]) * 180 / np.pi      # alpha = atan^-1(r21/r11)

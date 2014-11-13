@@ -83,8 +83,8 @@ private:
     double ransac_thresh_;
     /* Nearest-neighbour matching ratio */
     double nn_match_ratio_;
-    /* Minimal number of inliers to draw bounding box */
-    int bb_min_inliers_;
+    /* Minimal ration of inliers */
+    int ratio_min_inliers_;
 };
 
 #endif

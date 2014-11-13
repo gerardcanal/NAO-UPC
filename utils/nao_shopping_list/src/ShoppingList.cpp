@@ -44,7 +44,7 @@ ShoppingList::ShoppingList(const ros::NodeHandle& nh)
     nh.getParam("orb_nFeatures", orb_nFeatures_);
     nh.getParam("ransac_threshold", ransac_thresh_);
     nh.getParam("nn_match_ratio", nn_match_ratio_);
-    nh.getParam("bb_min_inliers", bb_min_inliers_);
+    nh.getParam("ratio_min_inliers_", ratio_min_inliers_);
 
     // load the data
     trainData();
@@ -99,6 +99,8 @@ void ShoppingList::trainData()
 			rmatcher_.computeKeyPointsAndDescriptors(img_sample, keypoints, descriptors);
 			/* Adds the object to the list */
 			objectsBag_.addObject(id, name, keypoints, descriptors);
+			// debug info
+			std::cout << "Num. descriptors " << descriptors.size() << std::endl;
 		}
 
 	}
@@ -152,6 +154,7 @@ void ShoppingList::process(const cv::Mat& img_in)
 			// DEBUG INFO
 			std::cout << " **********************************"                           << std::endl;
 			std::cout << "Object " << i << (obj_found ? " FOUND" : " NOT FOUND")         << std::endl;
+			std::cout << "Matches " << num_matches                                       << std::endl;
 			continue;
 		}
 
@@ -166,14 +169,15 @@ void ShoppingList::process(const cv::Mat& img_in)
 		// compute the ratio between found matches and inliers
 		float ratio_matches = (float)num_inliers*100/num_matches;
 		// rule to decide if is an object
-		obj_found = !H.empty() && (num_inliers >= bb_min_inliers_) && (ratio_matches > 10.0f);
+		obj_found = !H.empty() && (ratio_matches > ratio_min_inliers_);
 
 		// DEBUG INFO
-		std::cout << " **********************************"                       << std::endl;
-		std::cout << "Object " << i << (obj_found ? " FOUND" : " NOT FOUND")     << std::endl;
-		std::cout << "Num matches: " << num_matches                              << std::endl;
-		std::cout << "Num inliers: " << num_inliers                              << std::endl;
-		std::cout << "Ratio matches: " << ratio_matches << " %"                  << std::endl;
+		std::cout << " **********************************"                                          << std::endl;
+		std::cout << "Matches " << num_matches                                                      << std::endl;
+		std::cout << "Object " << i << " - " << names[i] << (obj_found ? " FOUND" : " NOT FOUND")   << std::endl;
+		std::cout << "Num matches: " << num_matches                                                 << std::endl;
+		std::cout << "Num inliers: " << num_inliers                                                 << std::endl;
+		std::cout << "Ratio matches: " << ratio_matches << " %"                                     << std::endl;
 
 		// save the results
 		if(obj_found) results_.push_back( std::make_pair(ids[i], names[i]) );
