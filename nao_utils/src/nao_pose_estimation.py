@@ -113,8 +113,6 @@ class SquareDetector:
         # Image Processing
         squares = self.find_squares(cv_image)
 
-        print 'len(squares)', len(squares)
-
         # Found up to 1 square
         if len(squares) > 0:
 
@@ -137,7 +135,7 @@ class SquareDetector:
             r = cv2.boundingRect(square)
             img_roi = cv_image[r[1]:r[1]+r[3], r[0]:r[0]+r[2]/4]
             mean = cv2.mean(cv2.mean(img_roi))[0]
-            print 'mean', mean
+            #print 'mean', mean
 
             # check if the tag is big or small
             # TODO: calibrate this threshold
@@ -224,19 +222,19 @@ class PoseEstimator:
 
     def __init__(self):
         #  small square            x       y        z
-        self._tag3D1 = np.array([ [0, -0.0390,  0.0390],      # [INNER] top-left
+        self._tag3D1 = np.array([[ [0, -0.0390,  0.0390],      # [INNER] top-left
                                   [0, -0.0390, -0.0390],      # [INNER] bottom-left
                                   [0,  0.0390, -0.0390],      # [INNER] bottom-right
                                   [0,  0.0390,  0.0390],      # [INNER] top-right
-                                  [0,       0,       0] ])    # [INNER] centroid
+                                  [0,       0,       0] ]])    # [INNER] centroid
         #  big square              x       y        z
-        self._tag3D2 = np.array([ [0, -0.0790,  0.0790],      # [INNER] top-left
+        self._tag3D2 = np.array([[ [0, -0.0790,  0.0790],      # [INNER] top-left
                                   [0, -0.0790, -0.0790],      # [INNER] bottom-left
                                   [0,  0.0790, -0.0790],      # [INNER] bottom-right
                                   [0,  0.0790,  0.0790],      # [INNER] top-right
-                                  [0,       0,       0] ])    # [INNER] centroid
-        # two squares
-        self._tag3D3 = np.array([ [0.01, -0.0390,  0.0390],   # [INNER] top-left
+                                  [0,       0,       0] ]])    # [INNER] centroid
+        # two squares              x       y        z
+        self._tag3D3 = np.array([[ [0.01, -0.0390,  0.0390],   # [INNER] top-left
                                   [0.01, -0.0390, -0.0390],   # [INNER] bottom-left
                                   [0.01,  0.0390, -0.0390],   # [INNER] bottom-right
                                   [0.01,  0.0390,  0.0390],   # [INNER] top-right
@@ -245,14 +243,14 @@ class PoseEstimator:
                                   [0,    -0.0790,  0.0790],   # [OUTTER] top-left
                                   [0,    -0.0790, -0.0790],   # [OUTTER] top-right
                                   [0,     0.0790, -0.0790],   # [OUTTER] bottom-right
-                                  [0,     0.0790,  0.0790] ]) # [OUTTER] bottom-left
+                                  [0,     0.0790,  0.0790] ]]) # [OUTTER] bottom-left
 
         self.tag2D = None
         self.tag3D = None
         self.K = np.array([ [767.225825,          0, 332.55728],  # calibration matrix
                             [         0, 768.281075, 211.85425],
-                            [        0,           0,         1] ])
-        self.distCoef = np.array([0.262785, -0.9941939999999999, 0.001014, 0.002283, 0]) # distortion coeficient vector
+                            [         0,          0,         1] ])
+        self.distCoef = np.array([[0.262785, -0.9941939999999999, 0.001014, 0.002283, 0]]) # distortion coeficient vector
 
     def computeOrientation(self, square):
         [x0, y0] = square[0] # top-left
@@ -260,23 +258,14 @@ class PoseEstimator:
         [x1, y1] = square[1] # bottom-left
         [x2, y2] = square[2] # bottom-right
 
-        theta_up    = np.arctan2( y3-y0, x3-x0) * 180 / np.pi
-        theta_down  = np.arctan2( y2-y1, x2-x1) * 180 / np.pi
-        theta_left  = np.arctan2( x1-x0, y1-y0) * 180 / np.pi
-        theta_right = np.arctan2( x2-x3, y2-y3) * 180 / np.pi
-
-        print 'theta_up', theta_up
-        print 'theta_down', theta_down
-        print 'theta_left', theta_left
-        print 'theta_right', theta_right
-
-        print 'average' , (abs(theta_up) + abs(theta_down) + abs(theta_left) + abs(theta_right)) / 4
-
         d_left = np.sqrt( np.power(x1-x0, 2) + np.power(y1-y0, 2) )
         d_right = np.sqrt( np.power(x2-x3,2) + np.power(y2-y3,2) )
+
+        print '**' 
         print 'd_left', d_left
         print 'd_right', d_right
         print 'd_ratio' , d_left/d_right
+        print '**'
 
         return 1
         
@@ -290,7 +279,7 @@ class PoseEstimator:
             self.tag3D = self._tag3D3
 
         # convert to float
-        self.tag2D = np.array(tag2D).astype(np.float)
+        self.tag2D = np.array([tag2D]).astype(np.float)
 
         # SolvePnP function --> estimates rotation and translation vector
         retval, rvec, tvec = cv2.solvePnP(self.tag3D, self.tag2D, self.K, self.distCoef, flags=cv2.SOLVEPNP_ITERATIVE)
@@ -298,6 +287,7 @@ class PoseEstimator:
 
         # Transform rotation vector to matrix
         dst, jacobian = cv2.Rodrigues(rvec)
+
         print 'euler_from_matrix',
         print [x * 180 / np.pi for x in euler_from_matrix(dst)]
 
