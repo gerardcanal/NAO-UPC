@@ -63,11 +63,13 @@ class MoveToState(ServiceState):
     def move_to_request_cb(self, ud, request):
         if (not self._objective):
             if not isinstance(ud.objective, Pose2D):
-                self._objective = Pose2D(ud.objective[0], ud.objective[1], ud.objective[2])
+                obj = Pose2D(ud.objective[0], ud.objective[1], ud.objective[2])
             else:
-                self._objective = ud.objective
+                obj = ud.objective
+        else:
+            obj = self._objective
         move_to_request = CmdPoseServiceRequest()
-        move_to_request.pose = self._objective
+        move_to_request.pose = obj
         return move_to_request
 
     # Method to execute the state

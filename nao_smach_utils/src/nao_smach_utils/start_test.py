@@ -12,7 +12,7 @@ class StartTest(StateMachine):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted']) 
 
         with self:
-            StateMachine.add('HOME_ON', HomeOn_SM(startPose='Sit'), transitions={'succeeded': 'SAY_WAITING'})
+            #StateMachine.add('HOME_ON', HomeOn_SM(startPose='Sit'), transitions={'succeeded': 'SAY_WAITING'})
 
             text = 'First test start. To proceed please touch my head.'
             StateMachine.add('SAY_WAITING', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
@@ -27,7 +27,7 @@ class StartTest(StateMachine):
             text = "I'm going to the going"
             StateMachine.add('SAY_GOING_TO_TAG', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
             
-            StateMachine.add('GO_TO_SQUARE', GoToSquare(dist_m_to_square=0.15, min_x_dist=0.25), transitions={'succeeded':'succeeded'})
+            StateMachine.add('GO_TO_SQUARE', GoToSquare(min_x_dist=0.25), transitions={'succeeded':'succeeded'})
             # the previous SM goes to succeeded -> succeeded
 
 class ReadTopicTactile(State):
