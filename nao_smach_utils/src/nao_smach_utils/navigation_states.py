@@ -31,6 +31,7 @@ class GoToSquare(StateMachine):
 
         with self:
             StateMachine.add('FIND_SQUARE', FindSquare(), transitions={'succeeded': 'PREPARE_OBJ'}, remapping={'square': 'square'})
+            
             def put_obj(ud):
                 x_mov = min(min_x_dist, abs(ud.square.z)-dist_m_to_square)
                 print ud.square, x_mov
@@ -40,8 +41,11 @@ class GoToSquare(StateMachine):
                 return 'succeeded'
             StateMachine.add('PREPARE_OBJ', CBState(put_obj, outcomes=['succeeded', 'reached'], input_keys=['square'], output_keys=['objective']),
                               transitions={'succeeded':'MOVE_TO_SQ', 'reached': 'SAY_REACHED'}, remapping={'objective': 'objective'})
+            
             StateMachine.add('MOVE_TO_SQ', MoveToState(), transitions={'succeeded': 'FIND_SQUARE'}, remapping={'objective': 'objective'})
-            StateMachine.add('SAY_REACHED', SpeechState(text='I am ready to something!', blocking=False), transitions={'succeeded': 'succeeded'})
+            
+            text = 'I am ready to something!'
+            StateMachine.add('SAY_REACHED', SpeechState(text=text, blocking=False), transitions={'succeeded': 'succeeded'})
 
 
 

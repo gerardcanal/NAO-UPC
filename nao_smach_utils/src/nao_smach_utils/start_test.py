@@ -12,13 +12,23 @@ class StartTest(StateMachine):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted']) 
 
         with self:
-            StateMachine.add('HOME_ON', HomeOn_SM(startPose='Sit'), transitions={'succeeded': 'WAIT_HEAD'})
-            StateMachine.add('WAIT_HEAD', ReadTopicTactile(), transitions={'succeeded': 'STAND_INIT', 'aborted':'SAY_NO_TOUCH'})
-            StateMachine.add('SAY_NO_TOUCH', SpeechState('Nobody touched my head in 30 seconds! Please touch my head.', blocking=True),
-                             transitions={'succeeded':'WAIT_HEAD'})
-            StateMachine.add('STAND_INIT', GoToPostureState('StandInit', 0.8), transitions={'succeeded': 'GO_TO_SQUARE'})
-            StateMachine.add('GO_TO_SQUARE', GoToSquare(dist_m_to_square=0.15, min_x_dist=0.25), transitions={'succeeded':'succeeded'})
+            StateMachine.add('HOME_ON', HomeOn_SM(startPose='Sit'), transitions={'succeeded': 'SAY_WAITING'})
 
+            text = 'First test start. To proceed please touch my head.'
+            StateMachine.add('SAY_WAITING', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
+
+            StateMachine.add('WAIT_HEAD', ReadTopicTactile(), transitions={'succeeded': 'STAND_INIT', 'aborted':'SAY_NO_TOUCH'})
+            
+            text = 'Nobody touched my head in 30 seconds! Please touch my head.'
+            StateMachine.add('SAY_NO_TOUCH', SpeechState(text=text, blocking=True), transitions={'succeeded':'WAIT_HEAD'})
+            
+            StateMachine.add('STAND_INIT', GoToPostureState('StandInit', 0.8), transitions={'succeeded': 'GO_TO_SQUARE'})
+                        
+            text = "I'm going to the going"
+            StateMachine.add('SAY_GOING_TO_TAG', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
+            
+            StateMachine.add('GO_TO_SQUARE', GoToSquare(dist_m_to_square=0.15, min_x_dist=0.25), transitions={'succeeded':'succeeded'})
+            # the previous SM goes to succeeded -> succeeded
 
 class ReadTopicTactile(State):
     def __init__(self, tactile_topic='/tactile_touch', timeout=30):
