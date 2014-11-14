@@ -41,14 +41,14 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>nao_msgs</build_depend>
-  <build_depend>nao_robot</build_depend>
+  <build_depend>nao_driver</build_depend>
   <build_depend>nao_smach_utils</build_depend>
   <build_depend>nao_tomato_tracker</build_depend>
   <build_depend>nao_utils</build_depend>
   <build_depend>smach</build_depend>
   <build_depend>smach_ros</build_depend>
   <run_depend>nao_msgs</run_depend>
-  <run_depend>nao_robot</run_depend>
+  <run_depend>nao_driver</run_depend>
   <run_depend>nao_smach_utils</run_depend>
   <run_depend>nao_tomato_tracker</run_depend>
   <run_depend>nao_utils</run_depend>

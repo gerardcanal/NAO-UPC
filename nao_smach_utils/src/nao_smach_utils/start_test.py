@@ -8,13 +8,13 @@ from navigation_states import GoToSquare
 from go_to_posture_state import GoToPostureState
 
 class StartTest(StateMachine):
-    def __init__(self):
+    def __init__(self, testName='first', dist_m_to_square=0.50):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted']) 
 
         with self:
             #StateMachine.add('HOME_ON', HomeOn_SM(startPose='Sit'), transitions={'succeeded': 'SAY_WAITING'})
 
-            text = 'First test start. To proceed please touch my head.'
+            text = '%s test start. To proceed please touch my head.' % testName
             StateMachine.add('SAY_WAITING', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
 
             StateMachine.add('WAIT_HEAD', ReadTopicTactile(), transitions={'succeeded': 'STAND_INIT', 'aborted':'SAY_NO_TOUCH'})
@@ -27,7 +27,7 @@ class StartTest(StateMachine):
             text = "I'm going to the tag"
             StateMachine.add('SAY_GOING_TO_TAG', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
             
-            StateMachine.add('GO_TO_SQUARE', GoToSquare(min_x_dist=0.25), transitions={'succeeded':'succeeded'})
+            StateMachine.add('GO_TO_SQUARE', GoToSquare(min_x_dist=0.25, dist_m_to_square=dist_m_to_square), transitions={'succeeded':'succeeded'})
             # the previous SM goes to succeeded -> succeeded
 
 class ReadTopicTactile(State):

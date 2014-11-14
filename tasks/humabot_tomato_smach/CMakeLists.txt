@@ -6,7 +6,7 @@ project(humabot_tomato_smach)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   nao_msgs
-  nao_robot
+  nao_driver
   nao_smach_utils
   nao_tomato_tracker
   nao_utils
