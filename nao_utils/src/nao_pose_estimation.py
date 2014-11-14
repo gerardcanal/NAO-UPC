@@ -278,6 +278,8 @@ class PoseEstimator:
         elif tag_type is 'both':
             self.tag3D = self._tag3D3
 
+        print 'tagtype', tag_type
+
         # convert to float
         self.tag2D = np.array([tag2D]).astype(np.float)
 
