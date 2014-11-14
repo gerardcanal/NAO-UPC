@@ -24,7 +24,7 @@ class StartTest(StateMachine):
             
             StateMachine.add('STAND_INIT', GoToPostureState('StandInit', 0.8), transitions={'succeeded': 'GO_TO_SQUARE'})
                         
-            text = "I'm going to the going"
+            text = "I'm going to the tag"
             StateMachine.add('SAY_GOING_TO_TAG', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
             
             StateMachine.add('GO_TO_SQUARE', GoToSquare(min_x_dist=0.25), transitions={'succeeded':'succeeded'})

@@ -34,5 +34,5 @@ if __name__ == '__main__':
     rospy.init_node('MOVE_ANGLE_TEST')
     sm = StateMachine(outcomes=['succeeded', 'preempted', 'aborted'])
     with sm:
-        StateMachine.add('TRAJECTORY', JointAngleState(['HeadPitch'], [-0.5]), transitions={'succeeded': 'succeeded'})
+        StateMachine.add('TRAJECTORY', JointAngleState(['HeadYaw'], [0.0]), transitions={'succeeded': 'succeeded'})
     sm.execute()

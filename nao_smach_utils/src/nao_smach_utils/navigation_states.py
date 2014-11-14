@@ -97,10 +97,10 @@ class GoToSquare(StateMachine):
             
             StateMachine.add('MOVE_TO_SQ', MoveToState(), transitions={'succeeded': 'FIND_SQUARE'}, remapping={'objective': 'objective'})
             
-            StateMachine.add('MOVE_TO_FINAL', MoveToState(), transitions={'succeeded': 'SAY_REACHED'}, remapping={'objective': 'objective'})
+            StateMachine.add('MOVE_TO_FINAL', MoveToState(), transitions={'succeeded': 'succeeded'}, remapping={'objective': 'objective'})
             
-            text = 'I am ready to something!'
-            StateMachine.add('SAY_REACHED', SpeechState(text=text, blocking=False), transitions={'succeeded': 'succeeded'})
+            #text = 'I am ready to something!'
+            #StateMachine.add('SAY_REACHED', SpeechState(text=text, blocking=False), transitions={'succeeded': 'succeeded'})
 
 
 

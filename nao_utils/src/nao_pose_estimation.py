@@ -81,7 +81,7 @@ class SquareDetector:
     def equalLength(self, cnt):
         x,y,w,h = cv2.boundingRect(cnt)
         aspect_ratio = float(w)/h
-        EPSILON = 0.10
+        EPSILON = 0.20
         return True if (aspect_ratio>1-EPSILON and aspect_ratio<1+EPSILON) else False
 
     def angle_cos(self, p0, p1, p2):
@@ -100,7 +100,7 @@ class SquareDetector:
             if len(cnt) == 4 and cv2.contourArea(cnt) > 1000 and cv2.isContourConvex(cnt):
                 cnt = cnt.reshape(-1, 2)
                 max_cos = np.max([self.angle_cos( cnt[i], cnt[(i+1) % 4], cnt[(i+2) % 4] ) for i in xrange(4)])
-                if max_cos < 0.1 and self.equalLength(cnt):
+                if max_cos < 0.25 and self.equalLength(cnt):
                     squares.append(cnt)
         return squares
 
