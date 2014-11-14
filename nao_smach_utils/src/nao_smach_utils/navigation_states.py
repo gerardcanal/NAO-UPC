@@ -63,10 +63,11 @@ class GoToSquare(StateMachine):
                 print '------------------ dist_m_to_square', dist_m_to_square
 
                 #if x_mov <= self.ALMOST_ZERO and ud.square.x <= self.ALMOST_ZERO:
-                if x_mov < min_x_dist:
-                    return 'one_step_left' 
                 ud.objective = Pose2D(x_mov, -ud.square.x, 0.0)
-                return 'succeeded'
+                if x_mov < min_x_dist:
+                    return 'one_step_left'
+                else:
+                    return 'succeeded'
             StateMachine.add('PREPARE_OBJ', CBState(put_obj, outcomes=['succeeded', 'one_step_left'], input_keys=['square'], output_keys=['objective']),
                               transitions={'succeeded':'MOVE_TO_SQ', 'one_step_left': 'MOVE_TO_FINAL'}, remapping={'objective': 'objective'})
             
