@@ -10,35 +10,51 @@ from nao_smach_utils.home_onoff import HomeOff_SM
 from nao_smach_utils.tts_state import SpeechState
 from nao_smach_utils.joint_trajectory_state import JointAngleState
 from nao_smach_utils.set_arms_walking_state import SetArmsWalkingState
-from nao_smach_utils.navigation_states import ReadTopicSquare
+from nao_smach_utils.navigation_states import ReadTopicSquare, transform_pose
+from nao_smach_utils.execute_choregraphe_behavior_state import ExecuteBehavior
 
+DISTANCE_TO_PAN = 0.2 # METRES
+ALMOST_ZERO = 0.01
 
 class ScanTable(StateMachine):
-    def __init__(self, min_y_step=-0.15, table_length=0.635):
-        StateMachine.__init(self, outcomes=['succeeded', 'aborted'])
+    ''' Moves laterally until it finds the tomato '''
+    def __init__(self, min_y_step=-0.15, table_length=0.59): # 0.635 table length
+        StateMachine.__init__(self, outcomes=['succeeded', 'aborted'])
+        self._moved = 0
+        self._min_y_step = min_y_step
 
         with self:
-            StateMachine.add('FIND_TOMATO', ReadTopicSquare(topic='/nao_tomato'), transitions={'succeeded': 'PREPARE_OBJ', 'aborted': 'LATERAL_MOVE'}, remapping={'square': 'tomato'})
+            StateMachine.add('FIND_TOMATO', ReadTopicSquare(topic='/nao_tomato'), transitions={'succeeded': 'PREPARE_OBJ', 'aborted': 'PREPARE_LATERAL'},
+                             remapping={'square': 'tomato'})
             
             def put_lateral_obj(ud):
+                if self._moved >= table_length: # We have to go the other way around as we have overpassed the table
+                    self._min_y_step = -self._min_y_step
+                    self._moved = 0
+                
+                # We move min_y_step meters or the what it's left to finish the table 
+                y_mov = min(abs(self._min_y_step), table_length-self._moved)*math.copysign(1, self._min_y_step)
+                self._moved += abs(y_mov)
+                ud.objective = Pose2D(0.0, y_mov, 0.0)
+                return 'succeeded'
+            StateMachine.add('PREPARE_LATERAL', CBState(put_lateral_obj, output_keys=['objective']), 
+                             transitions={'succeeded':'LATERAL_MOVE'}, remapping={'objective': 'objective'})
 
 
-            StateMachine.add('LATERAL_MOVE', MoveToState()))
+            StateMachine.add('LATERAL_MOVE', MoveToState(), transitions={'succeeded': 'FIND_TOMATO'})
 
             def put_obj(ud):
-
-                #if x_mov <= self.ALMOST_ZERO and ud.square.x <= self.ALMOST_ZERO:
-                obj = Pose2D(0.0, ud.tomato.y, 0.0)
+                transf_tomato = transform_pose(Pose2D(ud.tomato.x, ud.tomato.y, 0.0))
+                if (transf_tomato.y <= ALMOST_ZERO):
+                    return 'in_front'
+                obj = Pose2D(0.0, transf_tomato.y, 0.0)
                 ud.objective = obj
-                print '------------------ objective', obj
-                if x_mov < min_x_dist:
-                    return 'one_step_left'
-                else:
-                    return 'succeeded'
-            StateMachine.add('PREPARE_OBJ', CBState(put_obj, outcomes=['succeeded', 'one_step_left'], input_keys=['tomato'], output_keys=['objective']),
-                              transitions={'succeeded':'MOVE_TO_SQ', 'one_step_left': 'MOVE_TO_FINAL'}, remapping={'objective': 'objective'})
+                print '------------------ tomato_objective', obj
+                return 'succeeded'
+            StateMachine.add('PREPARE_OBJ', CBState(put_obj, outcomes=['succeeded', 'in_front'], input_keys=['tomato'], output_keys=['objective']),
+                              transitions={'succeeded':'MOVE_TO_TOMATO', 'in_front': 'succeeded'}, remapping={'objective': 'objective'})
             
-            StateMachine.add('MOVE_TO_TOMATO', MoveToState(), transitions={'succeeded': 'FIND_SQUARE'}, remapping={'objective': 'objective'})
+            StateMachine.add('MOVE_TO_TOMATO', MoveToState(), transitions={'succeeded': 'succeeded'}, remapping={'objective': 'objective'})
 
 if __name__ == '__main__':
     rospy.init_node('HUMABOT_TOMATO_TEST')
@@ -49,7 +65,7 @@ if __name__ == '__main__':
     with sm:
         StateMachine.add('START_THE_TEST', StartTest(testName='Meal preparation', dist_m_to_square=0.2), transitions={'succeeded': 'SAY_TURNTABLE'})
 
-        text = 'I will turn to the table to look for a tomato'
+        text = 'I will check the table to look for a tomato'
         StateMachine.add('SAY_TURNTABLE', SpeechState(text=text, blocking=False), transitions={'succeeded': 'TURN_TO_TABLE'})
 
         StateMachine.add('TURN_TO_TABLE', MoveToState(objective=Pose2D(0.0, 0.0, -math.pi/2)), transitions={'succeeded': 'LOOK_AT_TABLE'})
@@ -58,9 +74,25 @@ if __name__ == '__main__':
 
         StateMachine.add('DISABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=False, rightArmEnabled=False), transitions={'succeeded': 'APPROACH_TABLE'})
 
-        StateMachine.add('APPROACH_TABLE', MoveToState(objective=Pose2D(0.1, 0.0, 0.0)), transitions={'succeeded': 'HomeOFF'})
+        StateMachine.add('APPROACH_TABLE', MoveToState(objective=Pose2D(0.1, 0.0, 0.0)), transitions={'succeeded': 'SCAN_TABLE'})
 
-        # LOOK_AT_TABLE -> SCAN_TABLE (FIND TOMATO) -> GRASP TOMATO -> GO TO PAN -> RELEASE TOMATO
+        StateMachine.add('SCAN_TABLE', ScanTable(), transitions={'succeeded': 'SAY_GRASP'})
+
+        text = 'Look this is a tomato! I will try to grasp it!'
+        StateMachine.add('SAY_GRASP', SpeechState(text=text, blocking=False), transitions={'succeeded': 'GRASP_TOMATO'})
+
+        StateMachine.add('GRASP_TOMATO', ExecuteBehavior(behavior_name='tomato_grasp'), transitions={'succeeded':'SAY_GO_TO_RELEASE'})
+
+        text = 'I am going to release it in the pan! I am already hungry!!'
+        StateMachine.add('SAY_GO_TO_RELEASE', SpeechState(text=text, blocking=False), transitions={'succeeded': 'GO_TO_PAN'})
+
+        StateMachine.add('GO_TO_PAN', MoveToState(objective=Pose2D(0.0, DISTANCE_TO_PAN, 0.0)), transitions={'succeeded': 'RELEASE_TOMATO'})
+
+        StateMachine.add('RELEASE_TOMATO', ExecuteBehavior(behavior_name='tomato_release'), transitions={'succeeded':'SAY_FINISH'})
+
+
+        text = 'I am done, now we just have to wait for it to get cooked'
+        StateMachine.add('SAY_FINISH', SpeechState(text=text, blocking=False), transitions={'succeeded': 'HomeOFF'})
         
         StateMachine.add('HomeOFF', HomeOff_SM(), transitions={'succeeded': 'succeeded'})
 
