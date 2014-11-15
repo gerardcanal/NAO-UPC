@@ -1,7 +1,15 @@
 <launch>
 
+  <param name="Tuning" value="True" type="bool" />
+  <param name="lowerH" value="160" type="int" />
+  <param name="lowerS" value="120" type="int" />
+  <param name="lowerV" value="100" type="int" />
+  <param name="upperH" value="210" type="int" />
+  <param name="upperS" value="200" type="int" />
+  <param name="upperV" value="190" type="int" />
+
   <node name="nao_tomato_tracker_node" pkg="nao_tomato_tracker" type="nao_tomato_tracker_node" output="screen">
-     <remap from="/image_raw" to="/nao_camera/image_raw"/>
+    <remap from="/image_raw" to="/nao_camera/image_raw"/>
   </node>
 
 </launch>

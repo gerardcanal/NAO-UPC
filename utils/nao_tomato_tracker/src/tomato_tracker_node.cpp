@@ -19,17 +19,55 @@ private:
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
   TomatoTracker tracker;
+  int hsv_vals_[6];
+  bool tuning_;
   
 public:
   TomatoTrackerNode()
     : it_(nh_)
   {
     image_sub_ = it_.subscribe("/image_raw", 1, &TomatoTrackerNode::imageCb, this);
-	cv::namedWindow("Tomatoe", cv::WINDOW_KEEPRATIO);
+
+    initParams();
+    cv::namedWindow("Tomatoe", cv::WINDOW_KEEPRATIO);
+    if (tuning_) 
+    {
+      cv::createTrackbar("lowerH", "Tomatoe", &hsv_vals_[0], 255 );
+      cv::createTrackbar("upperH", "Tomatoe", &hsv_vals_[3], 255 );
+      cv::createTrackbar("lowerS", "Tomatoe", &hsv_vals_[1], 255 );
+      cv::createTrackbar("upperS", "Tomatoe", &hsv_vals_[4], 255 );
+      cv::createTrackbar("lowerV", "Tomatoe", &hsv_vals_[2], 255 );
+      cv::createTrackbar("upperV", "Tomatoe", &hsv_vals_[5], 255 );
+    }
   }
 
   ~TomatoTrackerNode(){ cv::destroyWindow("Tomatoe"); }
 
+  /* Debug method */
+  void printHSV()
+  {
+    std::cout << "lowerH " << hsv_vals_[0] << std::endl;
+    std::cout << "lowerS " << hsv_vals_[1] << std::endl;
+    std::cout << "lowerV " << hsv_vals_[2] << std::endl;
+    std::cout << "upperH " << hsv_vals_[3] << std::endl;
+    std::cout << "upperS " << hsv_vals_[4] << std::endl;
+    std::cout << "upperV " << hsv_vals_[5] << std::endl;
+    std::cout << "*********************************" << std::endl;
+  }
+
+  /* The method set the hsv from node handle */
+  void initParams()
+  {
+  	nh_.getParam("lowerH", hsv_vals_[0]);
+  	nh_.getParam("lowerS", hsv_vals_[1]);
+  	nh_.getParam("lowerV", hsv_vals_[2]);
+  	nh_.getParam("upperH", hsv_vals_[3]);
+  	nh_.getParam("upperS", hsv_vals_[4]);
+  	nh_.getParam("upperV", hsv_vals_[5]);
+    nh_.getParam("Tuning", tuning_);
+  }
+
+  /* Camera callbck */
   void imageCb(const sensor_msgs::ImageConstPtr& msg)
   {
     cv_bridge::CvImagePtr cv_ptr;
@@ -42,25 +80,26 @@ public:
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
-    	// fing tomato
-    	cv::Mat img_out = cv_ptr->image.clone();
-		cv::Point2f obj_pos;
-		float area;
-		tracker.track(img_out, obj_pos, area);
+    // find tomato
+    cv::Mat img_out = cv_ptr->image.clone();
+    cv::Point2f obj_pos;
+    float area;
+    tracker.track(img_out, hsv_vals_, obj_pos, area);
 
-		// create point to publish
-		geometry_msgs::Point point;
-		point.x = obj_pos.x;
-		point.y = obj_pos.y;
-		point.z = 0;
-		// tomato found, then publish
-		if ( area != -1 ) pub_.publish(point);
+    // create point to publish
+    geometry_msgs::Point point;
+    point.x = obj_pos.x;
+    point.y = obj_pos.y;
+    point.z = 0;
+    // tomato found, then publish
+    if ( area != -1 ) pub_.publish(point);
 
-		// debug
-		std::cout << "point: " << obj_pos.x << ", " << obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
-		cv::circle(img_out, cv::Point(point.x, point.x), 5, cv::Scalar(0, 255, 0));
-		cv::imshow("Tomatoe", img_out);
-		cv::waitKey(3);		
+    // debug
+    printHSV();
+    std::cout << "point: " << obj_pos.x << ", " << obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
+    cv::circle(img_out, cv::Point(point.x, point.y), 5, cv::Scalar(0, 255, 0));
+    cv::imshow("Tomatoe", img_out);
+    cv::waitKey(3);
   }
 };
 

@@ -13,20 +13,28 @@
 class TomatoTracker
 {
 public:
-	TomatoTracker();
-	TomatoTracker(int lowerH, int lowerS, int lowerV, int upperH, int upperS, int upperV);
-	void track(cv::Mat frame, cv::Point2f &obj_pos, float &radius);
+	TomatoTracker() {}
+	void track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_pos, float &radius);
 
 private:
-	int _lowerH;
-	int _lowerS;
-	int _lowerV;
-	int _upperH;
-	int _upperS;
-	int _upperV;
+	cv::Mat getThresholdedImage(const cv::Mat &imgHSV, int hsv_values[6]);
+	void trackObject(const cv::Mat &imgThresh, cv::Point2f &obj_pos, float &radius);
+};
 
-	cv::Mat getThresholdedImage(cv::Mat imgHSV);
-	void trackObject(cv::Mat imgThresh, cv::Point2f &obj_pos, float &radius);
+struct MyStruct
+{
+    int idx;
+    double area;
+
+    MyStruct(int i, double a) : idx(i), area(a) {}
+};
+
+struct greater_than_key
+{
+    inline bool operator() (const MyStruct& struct1, const MyStruct& struct2)
+    {
+        return (struct1.area > struct2.area);
+    }
 };
 
 #endif
