@@ -30,10 +30,10 @@
     <param name="video_device" type="string" value="/dev/video0" />      
     <param name="pixel_format" type="string" value="yuyv" />
 
-    <rosparam param="D">[-0.01484690262, 0.,0., 0., 0.000]</rosparam>
+    <!--<rosparam param="D">[-0.01484690262, 0.,0., 0., 0.000]</rosparam>
     <rosparam param="P">[543.1594454, 0.0, 320.1025306, 0.0, 0.0, 539.1300717, 212.8181022, 0.0, 0.0, 0.0, 1.0, 0.0]</rosparam>
     <rosparam param="R">[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]</rosparam>
-    <rosparam param="K">[543.1594454, 0.0, 320.1025306, 0.0, 539.1300717, 212.8181022, 0.0, 0.0, 1.0]</rosparam>
+    <rosparam param="K">[543.1594454, 0.0, 320.1025306, 0.0, 539.1300717, 212.8181022, 0.0, 0.0, 1.0]</rosparam>-->
   </node>
 
 </launch>
