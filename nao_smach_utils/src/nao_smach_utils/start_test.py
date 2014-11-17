@@ -27,7 +27,7 @@ class StartTest(StateMachine):
             text = "I'm going to the tag"
             StateMachine.add('SAY_GOING_TO_TAG', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
             
-            StateMachine.add('GO_TO_SQUARE', GoToSquare(min_x_dist=0.25, dist_m_to_square=dist_m_to_square), transitions={'succeeded':'succeeded'})
+            StateMachine.add('GO_TO_SQUARE', GoToSquare(min_x_dist=0.25, dist_m_to_square=dist_m_to_square, negative_vel=True), transitions={'succeeded':'succeeded'})
             # the previous SM goes to succeeded -> succeeded
 
 class ReadTopicTactile(State):
