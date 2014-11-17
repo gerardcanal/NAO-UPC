@@ -16,22 +16,15 @@ IP = '127.0.0.1'
 PORT = 9559
 USE_SONAR = True
 emergency_stop_publisher = None
-memoryProxy = None
+motionProxy = None
 
 
 def stop_walking(stop_method, who):
+    motionProxy.stopMove() # killWalk()
     if isinstance(stop_method, rospy.ServiceProxy): # Service call
         stop_method()
     else: # Publish cal
         stop_method.publish(Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0)))
-    # Final force stop: tell the robot it is flying (in case of blocking walks which does not stop by other means)
-    memoryProxy.raiseEvent("footContactChanged", 0.0)
-    memoryProxy.raiseEvent("footContactChanged", 1.0)
-
-    # memoryProxy.insertData("footContact", 0)
-    # memoryProxy.insertData("leftFootContact", 0)
-    # memoryProxy.insertData("rightFootContact", 0)
-    # memoryProxy.insertData("footContact", 1)
     emergency_stop_publisher.publish("Emergency stop has stopped the robot walk because of %s!" % who)
 
 
@@ -55,7 +48,7 @@ def tactile_touch_callback(data, stop_method):
         button = 'Rear button'
 
     if data.state == data.statePressed:
-        stop_walking(stop_method)
+        stop_walking(stop_method, button)
         rospy.loginfo('%s was pressed! Stop message has been sent.' % button)
     else:
         rospy.loginfo('%s was released. Nothing to do.' % button)
@@ -87,7 +80,7 @@ if __name__ == '__main__':
     IP = args.pip
     PORT = args.pport
     USE_SONAR = args.psonar
-    memoryProxy = ALProxy("ALMemory", IP, PORT)
+    motionProxy = ALProxy("ALMotion", IP, PORT)
 
     # Init node with this parameters
     rospy.init_node('NAO_emergency_stop')
