@@ -29,13 +29,15 @@ class MealPreparationSM(StateMachine):
 
             StateMachine.add('TURN_TO_TABLE', MoveToState(objective=Pose2D(0.0, 0.0, -math.pi/2)), transitions={'succeeded': 'LOOK_AT_TABLE'})
 
-            StateMachine.add('LOOK_AT_TABLE', JointAngleState(['HeadPitch', 'RElbowRoll', 'LElbowRoll'], [0.5, 0.05, -0.05]), transitions={'succeeded': 'DISABLE_ARM_WALK'})
+            StateMachine.add('LOOK_AT_TABLE', JointAngleState(['HeadPitch', 'RElbowRoll', 'LElbowRoll'], [0.35, 0.05, -0.05]), transitions={'succeeded': 'DISABLE_ARM_WALK'})
 
-            StateMachine.add('DISABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=False, rightArmEnabled=False), transitions={'succeeded': 'APPROACH_TABLE'})
+            StateMachine.add('DISABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=False, rightArmEnabled=False),
+                             transitions={'succeeded': 'SCAN_TABLE'})
 
-            StateMachine.add('APPROACH_TABLE', MoveToState(objective=Pose2D(APPROACH_TABLE_DIST, 0.0, 0.0)), transitions={'succeeded': 'SCAN_TABLE'})
+            StateMachine.add('SCAN_TABLE', ScanTable(), transitions={'succeeded': 'APPROACH_TABLE'})
 
-            StateMachine.add('SCAN_TABLE', ScanTable(), transitions={'succeeded': 'SAY_GRASP'})
+            StateMachine.add('APPROACH_TABLE', MoveToState(objective=Pose2D(APPROACH_TABLE_DIST, 0.0, 0.0)), 
+                             transitions={'succeeded': 'SAY_GRASP'})
 
             text = 'Look this is a tomato! I will try to grasp it!'
             StateMachine.add('SAY_GRASP', SpeechState(text=text, blocking=False), transitions={'succeeded': 'GRASP_TOMATO'})
