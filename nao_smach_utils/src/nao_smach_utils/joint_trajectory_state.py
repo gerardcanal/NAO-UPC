@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import rospy
+import sys
 import smach
 
 from smach import StateMachine, State
@@ -8,7 +9,7 @@ from nao_msgs.msg import JointAnglesWithSpeedAction, JointAnglesWithSpeedGoal
 
 class JointAngleState(SimpleActionState):
     '''Joint state which publish an angle movement'''
-    def __init__(self, joint_names, joint_angles=None):
+    def __init__(self, joint_names=None, joint_angles=None):
         self.joint_names = joint_names
         self.joint_angles = joint_angles
         input_keys = []
@@ -33,6 +34,14 @@ class JointAngleState(SimpleActionState):
 if __name__ == '__main__':
     rospy.init_node('MOVE_ANGLE_TEST')
     sm = StateMachine(outcomes=['succeeded', 'preempted', 'aborted'])
+
+    if len(sys.argv) == 3:
+        joint_name=[str(sys.argv[1])]
+        angle_val=[float(sys.argv[2])]
+    else:
+        joint_name = None
+        angle_val = None
+
     with sm:
-        StateMachine.add('TRAJECTORY', JointAngleState(['HeadYaw'], [0.0]), transitions={'succeeded': 'succeeded'})
+        StateMachine.add('TRAJECTORY', JointAngleState(joint_name, angle_val), transitions={'succeeded': 'succeeded'})
     sm.execute()

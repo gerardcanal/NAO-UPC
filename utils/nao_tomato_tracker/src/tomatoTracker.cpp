@@ -17,6 +17,7 @@ void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_po
 	//cv::erode(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 
 	this->trackObject(imgThresholded, obj_pos, radius);
+	//imgThresholded.copyTo(frame);
 }
 
 /* This function threshold the HSV image and create a binary image */
@@ -51,21 +52,24 @@ void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_
 		cv::approxPolyDP(cnt, cnt_approx, 0.02*cnt_len, true);
 		double area = contourArea(cnt_approx);
 		areas.push_back(MyStruct(i, area));
-	}
+	}	
 
-	// sort by area
-	std::sort(areas.begin(), areas.end(), greater_than_key());
+	if (contours.size() >= 1)
+	{
+		// sort by area
+		std::sort(areas.begin(), areas.end(), greater_than_key());
 
-	// get contour with higher area
-	std::vector<cv::Point> cnt = contours[areas[0].idx];
+		// get contour with higher area
+		std::vector<cv::Point> cnt = contours[areas[0].idx];
 
-	//Get the moments
-	cv::Moments mu = cv::moments(cnt, true); 
+		//Get the moments
+		cv::Moments mu = cv::moments(cnt, true); 
 
-	//Get the mass center:
-	if (mu.m00 > 2000) { //if radius<2000 is noise
-		obj_pos = cv::Point2f(static_cast<float>(mu.m10/mu.m00) , static_cast<float>(mu.m01/mu.m00));
-		radius = mu.m00;
+		//Get the mass center:
+		if (mu.m00 > 2000) { //if radius<2000 is noise
+			obj_pos = cv::Point2f(static_cast<float>(mu.m10/mu.m00) , static_cast<float>(mu.m01/mu.m00));
+			radius = mu.m00;
+		}	
 	} else {
 		obj_pos = cv::Point2f(-1, -1);
 		radius = -1;
