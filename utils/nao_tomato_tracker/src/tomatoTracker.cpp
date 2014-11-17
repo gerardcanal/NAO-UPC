@@ -1,7 +1,7 @@
 #include "tomatoTracker.h"
 
 /* This function finds the tomato and return the position as well as the area */
-void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_pos, float &radius)
+void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_pos, float &radius, float &mean)
 {
 	cv::Mat imgHSV;
 	cv::cvtColor(frame, imgHSV, cv::COLOR_BGR2HSV); 
@@ -16,8 +16,23 @@ void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_po
 	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 	cv::erode(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 
-	this->trackObject(imgThresholded, obj_pos, radius);
+	// find the object position
+	cv::Rect boundingRect;
+	this->trackObject(imgThresholded, obj_pos, radius, boundingRect);
+
+	// compute mean value
+	mean = this->getMean(frame, boundingRect);
+
+	// debug output
 	imgThresholded.copyTo(frame);
+}
+
+/* This function threshold the HSV image and create a binary image */
+float TomatoTracker::getMean(const cv::Mat &frame, const cv::Rect &boundingRect)
+{
+	cv::Mat img_roi = frame( boundingRect );
+	cv::Scalar mean = cv::mean( cv::mean( img_roi ) );
+	return mean[0];
 }
 
 /* This function threshold the HSV image and create a binary image */
@@ -31,7 +46,7 @@ cv::Mat TomatoTracker::getThresholdedImage(const cv::Mat &imgHSV, int hsv_values
 }
 
 /* This function tracks the object with bigger area */
-void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_pos, float &radius)
+void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_pos, float &radius, cv::Rect &boundingRect)
 {
 	// Find circles
 	/*std::vector<cv::Vec3f> circles;
@@ -60,10 +75,13 @@ void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_
 		std::sort(areas.begin(), areas.end(), greater_than_key());
 
 		// get contour with higher area
-		std::vector<cv::Point> cnt = contours[areas[0].idx];
+		std::vector<cv::Point>contour = contours[areas[0].idx];
+
+		// bounding rectangle
+		boundingRect = cv::boundingRect( cv::Mat(contour) );
 
 		//Get the moments
-		cv::Moments mu = cv::moments(cnt, true); 
+		cv::Moments mu = cv::moments(contour, true); 
 
 		//Get the mass center:
 		if (mu.m00 > 2000) { //if radius<2000 is noise

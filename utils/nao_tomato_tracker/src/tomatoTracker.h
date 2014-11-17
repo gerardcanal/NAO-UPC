@@ -14,11 +14,12 @@ class TomatoTracker
 {
 public:
 	TomatoTracker() {}
-	void track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_pos, float &radius);
+	void track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_pos, float &radius, float &mean);
 
 private:
 	cv::Mat getThresholdedImage(const cv::Mat &imgHSV, int hsv_values[6]);
-	void trackObject(const cv::Mat &imgThresh, cv::Point2f &obj_pos, float &radius);
+    float getMean(const cv::Mat &frame, const cv::Rect &boundingRect);
+	void trackObject(const cv::Mat &imgThresh, cv::Point2f &obj_pos, float &radius, cv::Rect &boundingRect);
 };
 
 struct MyStruct

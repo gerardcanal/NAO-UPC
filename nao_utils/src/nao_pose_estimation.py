@@ -39,7 +39,7 @@ class SquareDetector:
     '''
 
     def __init__(self, subs_topic='/image_raw', debug=False):
-        self.image_sub = rospy.Subscriber(subs_topic, Image, self.callback)
+        self.image_sub = rospy.Subscriber(subs_topic, Image, self.callback, queue_size = 1)
         if debug:
             self.image_pub = rospy.Publisher(subs_topic+'_processed', Image, queue_size=10)
         self.pose_pub = rospy.Publisher('/nao_square', Point, queue_size=10)

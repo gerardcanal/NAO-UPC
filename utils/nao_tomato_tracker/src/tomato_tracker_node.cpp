@@ -9,13 +9,15 @@
 #include <stdio.h>
 // Current Project
 #include "tomatoTracker.h"
+#include <nao_tomato_tracker/HotPlate.h>
 
 class TomatoTrackerNode
 {
 
 private:
   ros::NodeHandle nh_;
-  ros::Publisher pub_ = nh_.advertise<geometry_msgs::Point>("/nao_tomato", 10);
+  ros::Publisher pub_tomato_ = nh_.advertise<geometry_msgs::Point>("/nao_tomato", 10);
+  ros::Publisher pub_hot_plate_ = nh_.advertise<nao_tomato_tracker::HotPlate>("/nao_hot_plate", 10);
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
   TomatoTracker tracker;
@@ -83,22 +85,34 @@ public:
     // find tomato
     cv::Mat img_out = cv_ptr->image.clone();
     cv::Point2f obj_pos;
-    float area;
-    tracker.track(img_out, hsv_vals_, obj_pos, area);
+    float area, mean;
+    tracker.track(img_out, hsv_vals_, obj_pos, area, mean);
 
     // create point to publish and convert to meters
     geometry_msgs::Point point;
     point.x = (img_out.rows/2-obj_pos.x)/180;
     point.y = (img_out.cols/2-obj_pos.y)/180;
     point.z = 0;
-    // tomato found, then publish
-    if ( area != -1 ) pub_.publish(point);
+
+    // create hot plate message to plublish
+    nao_tomato_tracker::HotPlate hot_plate;
+    hot_plate.point.x = obj_pos.x;
+    hot_plate.point.y = obj_pos.y;
+    hot_plate.point.z = 0;
+    hot_plate.mean = mean;
+
+    // something found, then publish
+    if ( area != -1 ) 
+    {
+        pub_tomato_.publish(point);
+        pub_hot_plate_.publish(hot_plate);
+    }
 
     // debug
-    printHSV();
-    std::cout << "point[px]: " << obj_pos.x << ", " << obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
-    std::cout << "d[px]: " <<img_out.rows/2-obj_pos.x << ", " << img_out.cols/2-obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
-    std::cout << "point[m]: " << point.x << ", " << point.y << " radius: " << sqrt(area/M_PI) << std::endl;
+    //printHSV();
+    //std::cout << "point[px]: " << obj_pos.x << ", " << obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
+    //std::cout << "d[px]: " <<img_out.rows/2-obj_pos.x << ", " << img_out.cols/2-obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
+    //std::cout << "point[m]: " << point.x << ", " << point.y << " radius: " << sqrt(area/M_PI) << std::endl;
     cv::circle(img_out, cv::Point(obj_pos.x, obj_pos.y), 5, cv::Scalar(0, 255, 0));
     cv::imshow("Tomatoe", img_out);
     cv::waitKey(3);
