@@ -73,9 +73,9 @@ if __name__ == '__main__':
 
     # Define needed nodes
     # Nodes names to check
-    TOPIC_LIST_NAMES = ['/nao_square']
-    SERVICES_LIST_NAMES = ['/nao_shopping_list/checkObjects','/nao_shopping_list/trainObjects']
-    ACTION_LIST_NAMES = ['/speech','/joint_angles_action','/cmd_pose_srv']
+    TOPIC_LIST_NAMES = ['/nao_square','/nao_camera/image_raw']
+    SERVICES_LIST_NAMES = ['/nao_shopping_list/checkObjects','/nao_shopping_list/trainObjects','/cmd_pose_srv']
+    ACTION_LIST_NAMES = ['/speech','/joint_angles_action']
     PARAMS_LIST_NAMES = []
  
     # Create a SMACH state machine
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     with sm:
 
         StateMachine.add('CHECK_NODES', CheckNodesState(TOPIC_LIST_NAMES, SERVICES_LIST_NAMES, ACTION_LIST_NAMES, PARAMS_LIST_NAMES),
-                         transitions={'succeeded':'SHOPING_LIST_SM','aborted':'CHECK_NODES'})
+                         transitions={'succeeded':'SHOPING_LIST_SM','aborted':'aborted'})
 
         #StateMachine.add('START_THE_TEST', StartTest(), transitions={'succeeded': 'SHOPING_LIST_SM'})
 
