@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import math
-from smach import StateMachine
-from smach_ros import CBState
+from smach import StateMachine, CBState
 from nao_smach_utils.start_test import StartTest
 from nao_smach_utils.move_to_state import MoveToState
 from geometry_msgs.msg import Pose2D
