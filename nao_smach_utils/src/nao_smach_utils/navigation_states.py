@@ -68,16 +68,22 @@ class FindSquare(StateMachine):
             StateMachine.add('CHECK_SPEAK', CBState(check_speak, outcomes=['speak', 'no_speak']), transitions={'speak':'SPEAK_NF', 'no_speak':'LOOK_DOWN'})
 
 class GoToSquare(StateMachine):
-     def __init__(self, dist_m_to_square=0.50, min_x_dist=0.25):
+     def __init__(self, dist_m_to_square=0.50, min_x_dist=0.25, negative_vel=False):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
         self.ALMOST_ZERO = 0.005
+        self.negative_vel = negative_vel
 
         with self:
             StateMachine.add('FIND_SQUARE', FindSquare(), transitions={'succeeded': 'PREPARE_OBJ'}, remapping={'square': 'square'})
             
             def put_obj(ud):
                 transf_square = transform_pose(Pose2D(ud.square.z, ud.square.x, 0.0))
-                x_mov = min(min_x_dist, abs(transf_square.x)-dist_m_to_square)
+                if not self.negative_vel:
+                    y_mov = transf_square.y
+                else:
+                    y_mov = -1*abs(transf_square.y)
+
+                x_mov= min(min_x_dist, abs(transf_square.x)-dist_m_to_square)
                 print '------------------ ud.square', ud.square
                 print '------------------ transf_square', transf_square
                 print '------------------ x_mov', x_mov
@@ -85,7 +91,7 @@ class GoToSquare(StateMachine):
                 print '------------------ dist_m_to_square', dist_m_to_square
 
                 #if x_mov <= self.ALMOST_ZERO and ud.square.x <= self.ALMOST_ZERO:
-                obj = Pose2D(x_mov, transf_square.y, 0.0)
+                obj = Pose2D(x_mov, y_mov, 0.0)
                 ud.objective = obj
                 print '------------------ objective', obj
                 if x_mov < min_x_dist:
