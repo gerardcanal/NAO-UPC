@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import math
-from smach import StateMachine
-from smach_ros import CBState
+from smach import StateMachine, CBState
 from nao_smach_utils.start_test import StartTest
 from nao_smach_utils.move_to_state import MoveToState
 from geometry_msgs.msg import Pose2D
@@ -12,6 +11,7 @@ from nao_smach_utils.joint_trajectory_state import JointAngleState
 from nao_smach_utils.set_arms_walking_state import SetArmsWalkingState
 from nao_smach_utils.navigation_states import ReadTopicSquare, transform_pose
 from nao_smach_utils.execute_choregraphe_behavior_state import ExecuteBehavior
+from nao_smach_utils.check_nodes import CheckNodesState
 
 DISTANCE_TO_PAN = 0.2 # METRES
 ALMOST_ZERO = 0.01
@@ -19,12 +19,12 @@ ALMOST_ZERO = 0.01
 class ScanTable(StateMachine):
     ''' Moves laterally until it finds the tomato '''
     def __init__(self, min_y_step=-0.15, table_length=0.59): # 0.635 table length
-        StateMachine.__init__(self, outcomes=['succeeded', 'aborted'])
+        StateMachine.__init__(self, outcomes=['succeeded', 'aborted', 'preempted'])
         self._moved = 0
         self._min_y_step = min_y_step
 
         with self:
-            StateMachine.add('FIND_TOMATO', ReadTopicSquare(topic='/nao_tomato'), transitions={'succeeded': 'PREPARE_OBJ', 'aborted': 'PREPARE_LATERAL'},
+            StateMachine.add('FIND_TOMATO', ReadTopicSquare(square_topic='/nao_tomato'), transitions={'succeeded': 'PREPARE_OBJ', 'aborted': 'PREPARE_LATERAL'},
                              remapping={'square': 'tomato'})
             
             def put_lateral_obj(ud):
@@ -37,7 +37,7 @@ class ScanTable(StateMachine):
                 self._moved += abs(y_mov)
                 ud.objective = Pose2D(0.0, y_mov, 0.0)
                 return 'succeeded'
-            StateMachine.add('PREPARE_LATERAL', CBState(put_lateral_obj, output_keys=['objective']), 
+            StateMachine.add('PREPARE_LATERAL', CBState(put_lateral_obj, output_keys=['objective'], outcomes=['succeeded']), 
                              transitions={'succeeded':'LATERAL_MOVE'}, remapping={'objective': 'objective'})
 
 
@@ -59,11 +59,19 @@ class ScanTable(StateMachine):
 if __name__ == '__main__':
     rospy.init_node('HUMABOT_TOMATO_TEST')
  
+    TOPIC_LIST_NAMES = ['/nao_square', '/nao_tomato', '/nao_camera/image_raw']
+    SERVICES_LIST_NAMES = ['/cmd_pose_srv']
+    ACTION_LIST_NAMES = ['/speech','/joint_angles_action']
+    PARAMS_LIST_NAMES = []
+
     # Create a SMACH state machine
     sm = StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
 
     with sm:
-        StateMachine.add('START_THE_TEST', StartTest(testName='Meal preparation', dist_m_to_square=0.2), transitions={'succeeded': 'SAY_TURNTABLE'})
+        StateMachine.add('CHECK_NODES', CheckNodesState(TOPIC_LIST_NAMES, SERVICES_LIST_NAMES, ACTION_LIST_NAMES, PARAMS_LIST_NAMES),
+                         transitions={'succeeded':'START_THE_TEST','aborted':'aborted'})
+
+        StateMachine.add('START_THE_TEST', StartTest(testName='Meal preparation', dist_m_to_square=0.4), transitions={'succeeded': 'SAY_TURNTABLE'})
 
         text = 'I will check the table to look for a tomato'
         StateMachine.add('SAY_TURNTABLE', SpeechState(text=text, blocking=False), transitions={'succeeded': 'TURN_TO_TABLE'})
