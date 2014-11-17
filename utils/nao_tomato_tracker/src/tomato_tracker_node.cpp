@@ -86,18 +86,20 @@ public:
     float area;
     tracker.track(img_out, hsv_vals_, obj_pos, area);
 
-    // create point to publish
+    // create point to publish and convert to meters
     geometry_msgs::Point point;
-    point.x = obj_pos.x;
-    point.y = obj_pos.y;
+    point.x = (img_out.rows/2-obj_pos.x)/180;
+    point.y = (img_out.cols/2-obj_pos.y)/180;
     point.z = 0;
     // tomato found, then publish
     if ( area != -1 ) pub_.publish(point);
 
     // debug
     printHSV();
-    std::cout << "point: " << obj_pos.x << ", " << obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
-    cv::circle(img_out, cv::Point(point.x, point.y), 5, cv::Scalar(0, 255, 0));
+    std::cout << "point[px]: " << obj_pos.x << ", " << obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
+    std::cout << "d[px]: " <<img_out.rows/2-obj_pos.x << ", " << img_out.cols/2-obj_pos.y << " radius: " << sqrt(area/M_PI) << std::endl;
+    std::cout << "point[m]: " << point.x << ", " << point.y << " radius: " << sqrt(area/M_PI) << std::endl;
+    cv::circle(img_out, cv::Point(obj_pos.x, obj_pos.y), 5, cv::Scalar(0, 255, 0));
     cv::imshow("Tomatoe", img_out);
     cv::waitKey(3);
   }

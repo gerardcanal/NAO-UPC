@@ -80,14 +80,12 @@ class DoShoppingListSM(StateMachine):
             StateMachine.add('WAIT5', TimeOutState(1.0), transitions={'succeeded':'SAY_FINISH'})
 
             text = 'I am done. Sending the shopping list to AMAZON.'
-            StateMachine.add('SAY_FINISH', SpeechState(text=text, blocking=False), transitions={'succeeded': 'HomeOFF'})
-        
-            StateMachine.add('HomeOFF', HomeOff_SM(), transitions={'succeeded': 'succeeded'})
+            StateMachine.add('SAY_FINISH', SpeechState(text=text, blocking=False), transitions={'succeeded': 'succeeded'})
 
 
 if __name__ == '__main__':
     
-    rospy.init_node('HUMABOT_TOMATO_TEST')
+    rospy.init_node('HUMABOT_SHOPPING_LIST_TEST')
 
     # Define needed nodes
     # Nodes names to check
@@ -104,8 +102,10 @@ if __name__ == '__main__':
         StateMachine.add('CHECK_NODES', CheckNodesState(TOPIC_LIST_NAMES, SERVICES_LIST_NAMES, ACTION_LIST_NAMES, PARAMS_LIST_NAMES),
                          transitions={'succeeded':'SHOPING_LIST_SM','aborted':'aborted'})
 
-        #StateMachine.add('START_THE_TEST', StartTest(), transitions={'succeeded': 'SHOPING_LIST_SM'})
+        #StateMachine.add('START_THE_TEST', StartTest(testName='Shopping list', dist_m_to_square=0.4), transitions={'succeeded': 'SHOPING_LIST_SM'})
 
-        StateMachine.add('SHOPING_LIST_SM', DoShoppingListSM(), transitions={'succeeded':'succeeded'})
+        StateMachine.add('SHOPING_LIST_SM', DoShoppingListSM(), transitions={'succeeded':'HomeOFF'})
+
+        StateMachine.add('HomeOFF', HomeOff_SM(), transitions={'succeeded': 'succeeded'})
 
     sm.execute()

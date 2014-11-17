@@ -10,14 +10,14 @@ void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_po
 
 	// Morphological opening (remove small objects from the foreground)
 	cv::erode(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
-	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(25, 25)));
+	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 	
 	// Morphological closing (fill small holes in the foreground)
-	//cv::dilate(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
-	//cv::erode(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+	cv::erode(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 
 	this->trackObject(imgThresholded, obj_pos, radius);
-	//imgThresholded.copyTo(frame);
+	imgThresholded.copyTo(frame);
 }
 
 /* This function threshold the HSV image and create a binary image */
