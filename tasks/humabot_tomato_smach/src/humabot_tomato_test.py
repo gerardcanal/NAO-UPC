@@ -13,7 +13,9 @@ from nao_smach_utils.navigation_states import ReadTopicSquare, transform_pose
 from nao_smach_utils.execute_choregraphe_behavior_state import ExecuteBehavior
 from nao_smach_utils.check_nodes import CheckNodesState
 
-DISTANCE_TO_PAN = 0.2 # METRES
+DISTANCE_TO_PAN = 0.25 # METRES
+APPROACH_TABLE_DIST = 0.1 # METERS
+DISTANCE_TO_MARKER = 0.52 # METERS
 ALMOST_ZERO = 0.01
 
 class MealPreparationSM(StateMachine):
@@ -31,7 +33,7 @@ class MealPreparationSM(StateMachine):
 
             StateMachine.add('DISABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=False, rightArmEnabled=False), transitions={'succeeded': 'APPROACH_TABLE'})
 
-            StateMachine.add('APPROACH_TABLE', MoveToState(objective=Pose2D(0.1, 0.0, 0.0)), transitions={'succeeded': 'SCAN_TABLE'})
+            StateMachine.add('APPROACH_TABLE', MoveToState(objective=Pose2D(APPROACH_TABLE_DIST, 0.0, 0.0)), transitions={'succeeded': 'SCAN_TABLE'})
 
             StateMachine.add('SCAN_TABLE', ScanTable(), transitions={'succeeded': 'SAY_GRASP'})
 
@@ -40,23 +42,27 @@ class MealPreparationSM(StateMachine):
 
             StateMachine.add('GRASP_TOMATO', ExecuteBehavior(behavior_name='tomato_grasp'), transitions={'succeeded':'SAY_GO_TO_RELEASE'})
 
-            text = 'I am going to release it in the pan! I am already hungry!!'
+            text = 'I am going to release it in the pan! I am already hungry!'
             StateMachine.add('SAY_GO_TO_RELEASE', SpeechState(text=text, blocking=False), transitions={'succeeded': 'GO_TO_PAN'})
 
             StateMachine.add('GO_TO_PAN', MoveToState(objective=Pose2D(0.0, DISTANCE_TO_PAN, 0.0)), transitions={'succeeded': 'RELEASE_TOMATO'})
 
             StateMachine.add('RELEASE_TOMATO', ExecuteBehavior(behavior_name='tomato_release'), transitions={'succeeded':'SAY_FINISH'})
 
-            text = 'I am done, now we just have to wait for it to get cooked'
+            text = 'I am done, now we just have to wait until it is cooked.'
             StateMachine.add('SAY_FINISH', SpeechState(text=text, blocking=False), transitions={'succeeded': 'succeeded'})
 
 
 class ScanTable(StateMachine):
     ''' Moves laterally until it finds the tomato '''
-    def __init__(self, min_y_step=-0.15, table_length=0.59): # 0.635 table length
+    def __init__(self, min_y_step=-0.15, table_length=0.4): # 0.635 table length
         StateMachine.__init__(self, outcomes=['succeeded', 'aborted', 'preempted'])
         self._moved = 0
-        self._min_y_step = min_y_step
+        #############################################
+        #############################################
+        ### Change begin orientation in next line ###
+        self._min_y_step = -min_y_step
+        #############################################
 
         with self:
             StateMachine.add('FIND_TOMATO', ReadTopicSquare(square_topic='/nao_tomato'), transitions={'succeeded': 'PREPARE_OBJ', 'aborted': 'PREPARE_LATERAL'},
@@ -79,10 +85,11 @@ class ScanTable(StateMachine):
             StateMachine.add('LATERAL_MOVE', MoveToState(), transitions={'succeeded': 'FIND_TOMATO'})
 
             def put_obj(ud):
-                transf_tomato = transform_pose(Pose2D(ud.tomato.x, ud.tomato.y, 0.0))
+                transf_tomato = Pose2D(ud.tomato.y, ud.tomato.x, 0.0) #transform_pose(Pose2D(ud.tomato.x, ud.tomato.y, 0.0))
                 if (transf_tomato.y <= ALMOST_ZERO):
                     return 'in_front'
                 obj = Pose2D(0.0, transf_tomato.y, 0.0)
+
                 ud.objective = obj
                 print '------------------ tomato_objective', obj
                 return 'succeeded'
@@ -104,9 +111,14 @@ if __name__ == '__main__':
 
     with sm:
         StateMachine.add('CHECK_NODES', CheckNodesState(TOPIC_LIST_NAMES, SERVICES_LIST_NAMES, ACTION_LIST_NAMES, PARAMS_LIST_NAMES),
-                         transitions={'succeeded':'MEAL_PREPARATION','aborted':'aborted'})
+                         transitions={'succeeded':'ENABLE_ARM_WALK','aborted':'aborted'})
 
-        #StateMachine.add('START_THE_TEST', StartTest(testName='Meal preparation', dist_m_to_square=0.4), transitions={'succeeded': 'MEAL_PREPARATION'})
+        # Just in case they were disabled by a prior test... enable them
+        StateMachine.add('ENABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=True, rightArmEnabled=True),
+                         transitions={'succeeded': 'START_THE_TEST'})
+
+        StateMachine.add('START_THE_TEST', StartTest(testName='Meal preparation', dist_m_to_square=DISTANCE_TO_MARKER),
+                         transitions={'succeeded': 'MEAL_PREPARATION'})
 
         StateMachine.add('MEAL_PREPARATION', MealPreparationSM(), transitions={'succeeded':'HomeOFF'})
         

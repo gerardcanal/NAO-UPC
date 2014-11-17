@@ -22,7 +22,7 @@ class FindSquare(StateMachine):
             StateMachine.add('FIND_SQUARE1', ReadTopicSquare(), transitions={'succeeded': 'SPEAK_F', 'aborted': 'CHECK_SPEAK'})
 
             text = 'I have not found the marker. I will look around'
-            StateMachine.add('SPEAK_NF', SpeechState(text=text, blocking=True), transitions={'succeeded':'LOOK_DOWN'})
+            StateMachine.add('SPEAK_NF', SpeechState(text=text, blocking=False), transitions={'succeeded':'LOOK_DOWN'})
 
             text = 'I have found the marker!'
             StateMachine.add('SPEAK_F', SpeechState(text=text, blocking=True), transitions={'succeeded':'LOOK_FRONT'})

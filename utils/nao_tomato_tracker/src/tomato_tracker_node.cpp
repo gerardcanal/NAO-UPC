@@ -88,8 +88,8 @@ public:
 
     // create point to publish and convert to meters
     geometry_msgs::Point point;
-    point.x = (img_out.rows/2-obj_pos.x)/180;
-    point.y = (img_out.cols/2-obj_pos.y)/180;
+    point.x = (img_out.rows/2-obj_pos.x)/1800;
+    point.y = (img_out.cols/2-obj_pos.y)/1800;
     point.z = 0;
     // tomato found, then publish
     if ( area != -1 ) pub_.publish(point);
