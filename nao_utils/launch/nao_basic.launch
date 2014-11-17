@@ -23,5 +23,6 @@
   <!-- <node pkg="nao_utils" type="emergency_stop.py" name="nao_emergency_stop" output="screen"/> -->
   
   <include file="$(find nao_description)/launch/nao_state_publisher.launch" />
+  <include file="$(find nao_sensors)/launch/camera.launch" />
 
   </launch>
