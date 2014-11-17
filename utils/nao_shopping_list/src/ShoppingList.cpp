@@ -152,9 +152,9 @@ void ShoppingList::process(const cv::Mat& img_in)
 		if( !obj_found ) 
 		{			
 			// DEBUG INFO
-			std::cout << " **********************************"                           << std::endl;
+			/*std::cout << " **********************************"                           << std::endl;
 			std::cout << "Object " << i << (obj_found ? " FOUND" : " NOT FOUND")         << std::endl;
-			std::cout << "Matches " << num_matches                                       << std::endl;
+			std::cout << "Matches " << num_matches                                       << std::endl;*/
 			continue;
 		}
 
@@ -172,12 +172,15 @@ void ShoppingList::process(const cv::Mat& img_in)
 		obj_found = !H.empty() && (ratio_matches > ratio_min_inliers_);
 
 		// DEBUG INFO
-		std::cout << " **********************************"                                          << std::endl;
-		std::cout << "Matches " << num_matches                                                      << std::endl;
-		std::cout << "Object " << i << " - " << names[i] << (obj_found ? " FOUND" : " NOT FOUND")   << std::endl;
-		std::cout << "Num matches: " << num_matches                                                 << std::endl;
-		std::cout << "Num inliers: " << num_inliers                                                 << std::endl;
-		std::cout << "Ratio matches: " << ratio_matches << " %"                                     << std::endl;
+		if (obj_found)
+		{
+			std::cout << " **********************************"                                          << std::endl;
+			std::cout << "Matches " << num_matches                                                      << std::endl;
+			std::cout << "Object " << i << " - " << names[i] << (obj_found ? " FOUND" : " NOT FOUND")   << std::endl;
+			std::cout << "Num matches: " << num_matches                                                 << std::endl;
+			std::cout << "Num inliers: " << num_inliers                                                 << std::endl;
+			std::cout << "Ratio matches: " << ratio_matches << " %"                                     << std::endl;
+		}
 
 		// save the results
 		if(obj_found) results_.push_back( std::make_pair(ids[i], names[i]) );
