@@ -72,7 +72,7 @@ class PutOffFireSM(StateMachine):
             StateMachine.add('DISABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=False, rightArmEnabled=False),
                              transitions={'succeeded': 'LATERAL_TO_FIRE'})
 
-            StateMachine.add('LATERAL_TO_FIRE', MoveToState(Pose2D(0.0, DISTANCE_MARKER_TO_FIRE, 0.0), transitions={'succeeded': 'CHECK_FIRE'}))
+            StateMachine.add('LATERAL_TO_FIRE', MoveToState(Pose2D(0.0, DISTANCE_MARKER_TO_FIRE, 0.0)), transitions={'succeeded': 'CHECK_FIRE'})
 
             StateMachine.add('CHECK_FIRE', ReadTopicFire(), 
                              transitions={'succeeded': 'PREPARE_TEXT_AND_MOVEMENT'}, remapping={'plate': 'plate'})
