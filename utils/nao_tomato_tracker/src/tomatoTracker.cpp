@@ -1,7 +1,7 @@
 #include "tomatoTracker.h"
 
 /* This function finds the tomato and return the position as well as the area */
-void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_pos, float &radius, float &mean)
+void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_pos, float &area, float &mean)
 {
 	cv::Mat imgHSV;
 	cv::cvtColor(frame, imgHSV, cv::COLOR_BGR2HSV); 
@@ -18,7 +18,7 @@ void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_po
 
 	// find the object position
 	cv::Rect boundingRect;
-	this->trackObject(imgThresholded, obj_pos, radius, boundingRect);
+	this->trackObject(imgThresholded, obj_pos, area, boundingRect);
 
 	// compute mean value
 	mean = this->getMean(frame, boundingRect);
@@ -46,7 +46,7 @@ cv::Mat TomatoTracker::getThresholdedImage(const cv::Mat &imgHSV, int hsv_values
 }
 
 /* This function tracks the object with bigger area */
-void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_pos, float &radius, cv::Rect &boundingRect)
+void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_pos, float &area, cv::Rect &boundingRect)
 {
 	// Find circles
 	/*std::vector<cv::Vec3f> circles;
@@ -65,8 +65,8 @@ void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_
 		std::vector<cv::Point> cnt = contours[i], cnt_approx;
 		double cnt_len = cv::arcLength(cnt, true);
 		cv::approxPolyDP(cnt, cnt_approx, 0.02*cnt_len, true);
-		double area = contourArea(cnt_approx);
-		areas.push_back(MyStruct(i, area));
+		double area_i = contourArea(cnt_approx);
+		areas.push_back(MyStruct(i, area_i));
 	}	
 
 	if (contours.size() >= 1)
@@ -86,10 +86,10 @@ void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_
 		//Get the mass center:
 		if (mu.m00 > 2000) { //if radius<2000 is noise
 			obj_pos = cv::Point2f(static_cast<float>(mu.m10/mu.m00) , static_cast<float>(mu.m01/mu.m00));
-			radius = mu.m00;
+			area = areas[0].area;
 		}	
 	} else {
 		obj_pos = cv::Point2f(-1, -1);
-		radius = -1;
+		area = -1;
 	}
 }

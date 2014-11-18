@@ -99,7 +99,7 @@ public:
     hot_plate.point.x = obj_pos.x;
     hot_plate.point.y = obj_pos.y;
     hot_plate.point.z = 0;
-    hot_plate.mean = mean;
+    hot_plate.mean = area;
 
     // something found, then publish
     if ( area != -1 ) 
