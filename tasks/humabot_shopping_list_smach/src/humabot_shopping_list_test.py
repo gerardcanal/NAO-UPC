@@ -6,8 +6,13 @@ from nao_smach_utils.timeout_state import TimeOutState
 from nao_smach_utils.tts_state import SpeechState
 from nao_smach_utils.start_test import StartTest
 from nao_smach_utils.home_onoff import HomeOff_SM
+from nao_smach_utils.move_to_state import MoveToState
 from nao_smach_utils.joint_trajectory_state import JointAngleState
 from nao_smach_utils.shopping_list_state import ShoppingListState
+from go_to_posture_state import GoToPostureState
+from geometry_msgs.msg import Pose2D
+
+DISTANCE_TO_OBJECT_RECOGNITION = 0.2
 
 class DoShoppingListSM(StateMachine):
     def __init__(self):
@@ -20,9 +25,10 @@ class DoShoppingListSM(StateMachine):
         with self:
 
             text = "I'm ready to do the shopping list."
-            StateMachine.add('SAY_DO_SHOPPING_LIST', SpeechState(text=text, blocking=True), transitions={'succeeded':'LOOK_UP_RIGHT'})
+            StateMachine.add('SAY_DO_SHOPPING_LIST', SpeechState(text=text, blocking=True), transitions={'succeeded':'MOVE_RIGHT'})
             
-            StateMachine.add('LOOK_UP_RIGHT', JointAngleState(['HeadPitch','HeadYaw'], [-0.5, -0.5]), transitions={'succeeded':'WAIT1'})
+            StateMachine.add('MOVE_RIGHT', MoveToState(Pose2D(0.0, -DISTANCE_TO_OBJECT_RECOGNITION, 0.0)), transitions={'succeeded': 'LOOK_UP'})
+            StateMachine.add('LOOK_UP', JointAngleState(['HeadPitch'], [-0.5]), transitions={'succeeded':'WAIT1'})
 
             StateMachine.add('WAIT1', TimeOutState(self.waitTime), transitions={'succeeded':'CONTROL_CHECK1'})
 
@@ -36,20 +42,27 @@ class DoShoppingListSM(StateMachine):
                     return 'ended'
 
             StateMachine.add('CONTROL_CHECK1', CBState(check_obj, outcomes=['succeeded','ended'], input_keys=['in_list','in_detected'], output_keys=['out_list']),
-                              transitions={'succeeded':'CHECK_OBJECTS1','ended':'LOOK_UP_LEFT'}, remapping={'in_list':'shopping_list','out_list':'shopping_list'})
+                              transitions={'succeeded':'CHECK_OBJECTS1','ended':'SAY_CROUCH'}, remapping={'in_list':'shopping_list','out_list':'shopping_list'})
             
             StateMachine.add('CHECK_OBJECTS1', ShoppingListState(), transitions={'succeeded':'CONTROL_CHECK1'})
 
-            StateMachine.add('LOOK_UP_LEFT', JointAngleState(['HeadPitch', 'HeadYaw'], [-0.5, 0.5]), transitions={'succeeded': 'WAIT2'})
+            StateMachine.add('SAY_CROUCH', SpeechState('I will bend down to look the lower cupboard.', blocking=False), transitions={'succeeded':'CROUCH_POSE'})
+            StateMachine.add('CROUCH_POSE', GoToPostureState('Crouch', 0.5), transitions={'succeeded': 'LOOK_DOWN_LEFT'})
+            StateMachine.add('LOOK_DOWN_LEFT', JointAngleState(['HeadPitch','HeadYaw'], [0.5, 0.5]), transitions={'succeeded': 'WAIT2'})
 
             StateMachine.add('WAIT2', TimeOutState(self.waitTime), transitions={'succeeded':'CONTROL_CHECK2'})
 
             StateMachine.add('CONTROL_CHECK2', CBState(check_obj, outcomes=['succeeded', 'ended'], input_keys=['in_list','in_detected'], output_keys=['out_list']),
-                              transitions={'succeeded':'CHECK_OBJECTS2', 'ended':'LOOK_DOWN_LEFT'}, remapping={'in_list':'shopping_list','out_list':'shopping_list'})
+                              transitions={'succeeded':'CHECK_OBJECTS2', 'ended':'LOOK_CENTER'}, remapping={'in_list':'shopping_list','out_list':'shopping_list'})
             
             StateMachine.add('CHECK_OBJECTS2', ShoppingListState(), transitions={'succeeded': 'CONTROL_CHECK2'})
 
-            StateMachine.add('LOOK_DOWN_LEFT', JointAngleState(['HeadPitch','HeadYaw'], [0.5, 0.5]), transitions={'succeeded': 'WAIT3'})
+            StateMachine.add('LOOK_CENTER', JointAngleState(['HeadPitch', 'HeadYaw'], [0.0, 0.0]), transitions={'succeeded':'SAY_GOING_LEFT'})
+            StateMachine.add('SAY_GOING_LEFT', SpeechState('I will go to look to the upper cupboard.', blocking=False), transitions={'succeeded':'MOVE_LEFT'})
+            StateMachine.add('MOVE_LEFT', MoveToState(Pose2D(0.0, 2*DISTANCE_TO_OBJECT_RECOGNITION, 0.0)),
+                             transitions={'succeeded': 'LOOK_UP2'})
+            StateMachine.add('LOOK_UP2', JointAngleState(['HeadPitch'], [-0.5]), transitions={'succeeded':'WAIT3'})
+
 
             StateMachine.add('WAIT3', TimeOutState(self.waitTime), transitions={'succeeded':'CONTROL_CHECK3'})
 
