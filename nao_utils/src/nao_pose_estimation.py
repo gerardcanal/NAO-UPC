@@ -221,29 +221,35 @@ class PoseEstimator:
     '''
 
     def __init__(self):
-        #  small square            x       y        z
-        self._tag3D1 = np.array([[ [0, -0.0390,  0.0390],      # [INNER] top-left
-                                  [0, -0.0390, -0.0390],      # [INNER] bottom-left
-                                  [0,  0.0390, -0.0390],      # [INNER] bottom-right
-                                  [0,  0.0390,  0.0390],      # [INNER] top-right
-                                  [0,       0,       0] ]])    # [INNER] centroid
+    	# scenario
+    	self.sBig = 0.0660
+    	self.sSmall = 0.0330
+    	# our tag
+    	#self.sBig = 0.0790
+    	#self.sSmall = 0.039
+        #  small square             x       y        z
+        self._tag3D1 = np.array([[ [0, -self.sSmall,  self.sSmall],      # [INNER] top-left
+                                   [0, -self.sSmall, -self.sSmall],      # [INNER] bottom-left
+                                   [0,  self.sSmall, -self.sSmall],      # [INNER] bottom-right
+                                   [0,  self.sSmall,  self.sSmall],      # [INNER] top-right
+                                   [0,            0,            0] ]])   # [INNER] centroid
         #  big square              x       y        z
-        self._tag3D2 = np.array([[ [0, -0.0790,  0.0790],      # [INNER] top-left
-                                  [0, -0.0790, -0.0790],      # [INNER] bottom-left
-                                  [0,  0.0790, -0.0790],      # [INNER] bottom-right
-                                  [0,  0.0790,  0.0790],      # [INNER] top-right
-                                  [0,       0,       0] ]])    # [INNER] centroid
+        self._tag3D2 = np.array([[ [0, -self.sBig,  self.sBig],          # [INNER] top-left
+                                   [0, -self.sBig, -self.sBig],          # [INNER] bottom-left
+                                   [0,  self.sBig, -self.sBig],          # [INNER] bottom-right
+                                   [0,  self.sBig,  self.sBig],          # [INNER] top-right
+                                   [0,          0,          0] ]])       # [INNER] centroid
         # two squares              x       y        z
-        self._tag3D3 = np.array([[ [0.01, -0.0390,  0.0390],   # [INNER] top-left
-                                  [0.01, -0.0390, -0.0390],   # [INNER] bottom-left
-                                  [0.01,  0.0390, -0.0390],   # [INNER] bottom-right
-                                  [0.01,  0.0390,  0.0390],   # [INNER] top-right
-                                  [0.01,       0,       0],   # [INNER] centroid
-                                  #TODO: check this order
-                                  [0,    -0.0790,  0.0790],   # [OUTTER] top-left
-                                  [0,    -0.0790, -0.0790],   # [OUTTER] top-right
-                                  [0,     0.0790, -0.0790],   # [OUTTER] bottom-right
-                                  [0,     0.0790,  0.0790] ]]) # [OUTTER] bottom-left
+        self._tag3D3 = np.array([[ [0.01, -self.sSmall,  self.sSmall],   # [INNER] top-left
+                                   [0.01, -self.sSmall, -self.sSmall],   # [INNER] bottom-left
+                                   [0.01,  self.sSmall, -self.sSmall],   # [INNER] bottom-right
+                                   [0.01,  self.sSmall,  self.sSmall],   # [INNER] top-right
+                                   [0.01,            0,            0],   # [INNER] centroid
+                                   #TODO: check this order
+                                   [0,      -self.sBig,    self.sBig],   # [OUTTER] top-left
+                                   [0,      -self.sBig,   -self.sBig],   # [OUTTER] top-right
+                                   [0,       self.sBig,   -self.sBig],   # [OUTTER] bottom-right
+                                   [0,       self.sBig,    self.sBig] ]]) # [OUTTER] bottom-left
 
         self.tag2D = None
         self.tag3D = None
