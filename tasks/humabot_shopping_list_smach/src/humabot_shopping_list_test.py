@@ -44,7 +44,7 @@ class DoShoppingListSM(StateMachine):
             StateMachine.add('CONTROL_CHECK1', CBState(check_obj, outcomes=['succeeded','ended'], input_keys=['in_list','in_detected'], output_keys=['out_list']),
                               transitions={'succeeded':'CHECK_OBJECTS1','ended':'SAY_CROUCH'}, remapping={'in_list':'shopping_list','out_list':'shopping_list'})
             
-            StateMachine.add('CHECK_OBJECTS1', ShoppingListState(), transitions={'succeeded':'CONTROL_CHECK1'})
+            StateMachine.add('CHECK_OBJECTS1', ShoppingListState(), transitions={'succeeded':'CONTROL_CHECK1','aborted':'CHECK_OBJECTS1'})
 
             StateMachine.add('SAY_CROUCH', SpeechState('I will bend down to look the lower cupboard.', blocking=False), transitions={'succeeded':'CROUCH_POSE'})
             StateMachine.add('CROUCH_POSE', GoToPostureState('Crouch', 0.5), transitions={'succeeded': 'LOOK_DOWN_LEFT'})
@@ -55,7 +55,7 @@ class DoShoppingListSM(StateMachine):
             StateMachine.add('CONTROL_CHECK2', CBState(check_obj, outcomes=['succeeded', 'ended'], input_keys=['in_list','in_detected'], output_keys=['out_list']),
                               transitions={'succeeded':'CHECK_OBJECTS2', 'ended':'LOOK_CENTER'}, remapping={'in_list':'shopping_list','out_list':'shopping_list'})
             
-            StateMachine.add('CHECK_OBJECTS2', ShoppingListState(), transitions={'succeeded': 'CONTROL_CHECK2'})
+            StateMachine.add('CHECK_OBJECTS2', ShoppingListState(), transitions={'succeeded': 'CONTROL_CHECK2','aborted':'CHECK_OBJECTS2'})
 
             StateMachine.add('LOOK_CENTER', JointAngleState(['HeadPitch', 'HeadYaw'], [0.0, 0.0]), transitions={'succeeded':'SAY_GOING_LEFT'})
             StateMachine.add('SAY_GOING_LEFT', SpeechState('I will go to look to the upper cupboard.', blocking=False), transitions={'succeeded':'MOVE_LEFT'})
@@ -69,7 +69,7 @@ class DoShoppingListSM(StateMachine):
             StateMachine.add('CONTROL_CHECK3', CBState(check_obj, outcomes=['succeeded','ended'], input_keys=['in_list','in_detected'], output_keys=['out_list']),
                               transitions={'succeeded':'CHECK_OBJECTS3', 'ended':'LOOK_FRONT'}, remapping={'in_list':'shopping_list','out_list':'shopping_list'})
             
-            StateMachine.add('CHECK_OBJECTS3', ShoppingListState(), transitions={'succeeded':'CONTROL_CHECK3'})
+            StateMachine.add('CHECK_OBJECTS3', ShoppingListState(), transitions={'succeeded':'CONTROL_CHECK3','aborted':'CHECK_OBJECTS3'})
 
             StateMachine.add('LOOK_FRONT', JointAngleState(['HeadPitch', 'HeadYaw'], [0.0, 0.0]), transitions={'succeeded':'PREPARE_TEXT'})
 

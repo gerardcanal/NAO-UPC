@@ -88,7 +88,7 @@ def main():
 
 		smach.StateMachine.add('SHOPPING_LIST',
 								ShoppingListState(),
-								transitions={'succeeded': 'succeeded'})
+								transitions={'succeeded': 'succeeded','aborted':'SHOPPING_LIST'})
 
 		# Execute the state machine
 		sm.execute()
