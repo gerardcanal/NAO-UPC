@@ -72,6 +72,7 @@ class ShoppingListState(ServiceState):
 
 	# Method to execute the state
 	def execute(self, ud):
+		rospy.wait_for_service('/nao_shopping_list/checkObjects')
 		rospy.loginfo('Checking objects')
 		return super(ShoppingListState, self).execute(ud)
 
