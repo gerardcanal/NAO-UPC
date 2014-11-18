@@ -85,25 +85,27 @@ public:
     // find tomato
     cv::Mat img_out = cv_ptr->image.clone();
     cv::Point2f obj_pos;
-    float area, mean;
+    float area=0, mean=0;
     tracker.track(img_out, hsv_vals_, obj_pos, area, mean);
 
     // create point to publish and convert to meters
     geometry_msgs::Point point;
-    point.x = (img_out.rows/2-obj_pos.x)/1800;
-    point.y = (img_out.cols/2-obj_pos.y)/1800;
-    point.z = 0;
-
+    
     // create hot plate message to plublish
     nao_tomato_tracker::HotPlate hot_plate;
-    hot_plate.point.x = obj_pos.x;
-    hot_plate.point.y = obj_pos.y;
-    hot_plate.point.z = 0;
-    hot_plate.mean = area;
-
+   
     // something found, then publish
-    if ( area != -1 ) 
+    if ( area != -1 )
     {
+        point.x = (img_out.rows/2-obj_pos.x)/1800;
+        point.y = (img_out.cols/2-obj_pos.y)/1800;
+        point.z = 0;
+
+        hot_plate.point.x = obj_pos.x;
+        hot_plate.point.y = obj_pos.y;
+        hot_plate.point.z = 0;
+        hot_plate.mean = area;
+
         pub_tomato_.publish(point);
         pub_hot_plate_.publish(hot_plate);
     }

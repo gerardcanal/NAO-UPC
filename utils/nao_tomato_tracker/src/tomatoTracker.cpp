@@ -10,11 +10,11 @@ void TomatoTracker::track(cv::Mat &frame, int hsv_values[6], cv::Point2f &obj_po
 
 	// Morphological opening (remove small objects from the foreground)
 	cv::erode(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
-	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(15, 15)));
 	
 	// Morphological closing (fill small holes in the foreground)
 	cv::dilate(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
-	cv::erode(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+	cv::erode(imgThresholded, imgThresholded, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(15, 15)));
 
 	// find the object position
 	cv::Rect boundingRect;
@@ -84,7 +84,8 @@ void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_
 		cv::Moments mu = cv::moments(contour, true); 
 
 		//Get the mass center:
-		if (mu.m00 > 2000) { //if radius<2000 is noise
+		if (mu.m00 > 1000) 
+		{ //if radius<2000 is noise
 			obj_pos = cv::Point2f(static_cast<float>(mu.m10/mu.m00) , static_cast<float>(mu.m01/mu.m00));
 			area = areas[0].area;
 		}	
