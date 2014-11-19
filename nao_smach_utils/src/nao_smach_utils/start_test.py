@@ -8,11 +8,11 @@ from navigation_states import GoToSquare
 from go_to_posture_state import GoToPostureState
 
 class StartTest(StateMachine):
-    def __init__(self, testName='first', dist_m_to_square=0.50, go_to_square=True):
+    def __init__(self, testName='first', dist_m_to_square=0.50, go_to_square=True, StartPose='Crouch'):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted']) 
 
         with self:
-            StateMachine.add('HOME_ON', HomeOn_SM(startPose='Crouch'), transitions={'succeeded': 'SAY_WAITING'})
+            StateMachine.add('HOME_ON', HomeOn_SM(startPose=StartPose), transitions={'succeeded': 'SAY_WAITING'})
 
             text = '%s test start. To proceed please touch my head.' % testName
             StateMachine.add('SAY_WAITING', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})

@@ -56,7 +56,8 @@ class ReadTopicFire(State):
 
 LEFT_MOVE = 0.14
 FRONT_MOVE = 0.27
-REORIENT_RAD = -15
+REORIENT_RAD = -0.8
+REORIENT_FIRE = -0.5
 
 class PutOffFireSM(StateMachine):
     def __init__(self):
@@ -79,7 +80,9 @@ class PutOffFireSM(StateMachine):
             #StateMachine.add('LATERAL_TO_FIRE', MoveToState(Pose2D(0.0, DISTANCE_MARKER_TO_FIRE, 0.0)), transitions={'succeeded': 'CHECK_FIRE'})
 
             StateMachine.add('CHECK_FIRE', ReadTopicFire(), 
-                             transitions={'succeeded': 'PREPARE_TEXT_AND_MOVEMENT', 'aborted': 'SAY_NO_FIRE_LIT'}, remapping={'plate': 'plate'})
+                             transitions={'succeeded': 'PREPARE_TEXT_AND_MOVEMENT', 'aborted': 'REORIENT_FIRE'}, remapping={'plate': 'plate'})
+
+            StateMachine.add('REORIENT_FIRE', MoveToState(Pose2D(0.0, 0.0, REORIENT_FIRE)), transitions={'succeeded': 'CHECK_FIRE'})
 
             def prep_text(ud):
                 ud.out_text = "The %s fire is lit! I will put it off." % ud.plate.lower()
