@@ -16,7 +16,7 @@ DISTANCE_TO_MARKER = 0.52 # METERS
 DISTANCE_MARKER_TO_FIRE = 0.4 # METERS
 DISTANCE_FIRE_UPPER_BUTTON = 0.3 # METERS
 DISTANCE_FIRE_LOWER_BUTTON = 0.25 # METERS
-DISTANCE_BACK_FROM_FIRE = 0.2 # METERS
+DISTANCE_BACK_FROM_FIRE = 0.1 # METERS
 AREA_TH = 2800
 WAIT_FIRE = 3
 
@@ -56,6 +56,7 @@ class ReadTopicFire(State):
 
 LEFT_MOVE = 0.14
 FRONT_MOVE = 0.27
+REORIENT_RAD = -15
 
 class PutOffFireSM(StateMachine):
     def __init__(self):
@@ -111,10 +112,25 @@ class PutOffFireSM(StateMachine):
             #StateMachine.add('MOVE_TO_BUTTON', MoveToState(), transitions={'succeeded': 'PUT_OFF_FIRE_MOVEMENT'},
             #                 remapping={'objective': 'objective'})
 
-            StateMachine.add('PUT_OFF_UPPER_FIRE_MOVEMENT', ExecuteBehavior(behavior_name='putoff_upper_fire'), transitions={'succeeded':'SAY_FINISH'})
-            StateMachine.add('PUT_OFF_LOWER_FIRE_MOVEMENT', ExecuteBehavior(behavior_name='putoff_lower_fire'), transitions={'succeeded':'SAY_FINISH'})
+            StateMachine.add('PUT_OFF_UPPER_FIRE_MOVEMENT', ExecuteBehavior(behavior_name='putoff_upper_fire'), transitions={'succeeded':'RE_CHECK'})
+            StateMachine.add('PUT_OFF_LOWER_FIRE_MOVEMENT', ExecuteBehavior(behavior_name='putoff_lower_fire'), transitions={'succeeded':'RE_CHECK'})
 
-            StateMachine.add('SAY_NO_FIRE_LIT', SpeechState(text='I am done as no fire is lit.', blocking=True), transitions={'succeeded': 'GO_BACK'})
+            StateMachine.add('RE_CHECK', ReadTopicFire(), 
+                             transitions={'succeeded': 'SAY_FAILED', 'aborted': 'SAY_FINISH'}, remapping={'plate': 'plate'})
+
+            StateMachine.add('SAY_FAILED', SpeechState(text='Oh I failed!', blocking=False), transitions={'succeeded': 'REORIENT'})
+
+            StateMachine.add('REORIENT', MoveToState(Pose2D(0.0,0.0, REORIENT_RAD)), transitions={'succeeded': 'REPUTOFF'})
+
+            StateMachine.add('REPUTOFF', ExecuteBehavior(behavior_name='putoff_upper_fire'), transitions={'succeeded':'LAST_CHECK'})
+
+            StateMachine.add('LAST_CHECK', ReadTopicFire(), 
+                             transitions={'succeeded': 'SAY_EVACUATE', 'aborted': 'SAY_FINISH'}, remapping={'plate': 'plate'})
+
+            StateMachine.add('SAY_EVACUATE', SpeechState(text='I could not put off the fire. Alarm! Please evacuate the room.', blocking=False),
+                             transitions={'succeeded': 'GO_BACK'})
+            
+            StateMachine.add('SAY_NO_FIRE_LIT', SpeechState(text='I am done as no fire is lit.', blocking=False), transitions={'succeeded': 'GO_BACK'})
 
             text = 'I am done, there is no need to call the fire department!'
             StateMachine.add('SAY_FINISH', SpeechState(text=text, blocking=False), transitions={'succeeded': 'GO_BACK'})
