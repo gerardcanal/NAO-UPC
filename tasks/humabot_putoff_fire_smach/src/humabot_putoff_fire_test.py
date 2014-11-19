@@ -16,9 +16,9 @@ DISTANCE_TO_MARKER = 0.52 # METERS
 DISTANCE_MARKER_TO_FIRE = 0.4 # METERS
 DISTANCE_FIRE_UPPER_BUTTON = 0.3 # METERS
 DISTANCE_FIRE_LOWER_BUTTON = 0.25 # METERS
-DISTANCE_BACK_FROM_FIRE = 0.5 # METERS
-UPPER_FIRE_Y = 245
-INTENSITY_TH = 300
+DISTANCE_BACK_FROM_FIRE = 0.2 # METERS
+AREA_TH = 2800
+WAIT_FIRE = 3
 
 class ReadTopicFire(State):
     def __init__(self, hot_plate_topic='/nao_hot_plate', timeout=5):
@@ -29,20 +29,17 @@ class ReadTopicFire(State):
         self._timeout = rospy.Duration(timeout)
 
     def hot_plate_cb(self, data):
-        if data.point.y > UPPER_FIRE_Y:
-            if data.mean > INTENSITY_TH:
-                self._plate = "UPPER"
-            else:
-                self._plate = "LOWER"
+        if data.point.x == 0 or data.point.y == 0 or data.mean == 0:
+            return None
+        if data.mean > AREA_TH:
+            self._plate = "LOWER"
         else:
-            if data.mean > INTENSITY_TH:
-                self._plate = "LOWER"
-            else:
-                self._plate = "UPPER"
+            self._plate = "UPPER"
 
         return None
 
     def execute(self, userdata):
+        rospy.sleep(WAIT_FIRE)
         subs = rospy.Subscriber(self._topic, HotPlate, self.hot_plate_cb)
         startT = rospy.Time.now()
         timeout = False
@@ -57,25 +54,31 @@ class ReadTopicFire(State):
         else:
             return 'aborted'
 
+LEFT_MOVE = 0.14
+FRONT_MOVE = 0.27
+
 class PutOffFireSM(StateMachine):
     def __init__(self):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
 
         with self:
+            StateMachine.add('MOVE_LEFT', MoveToState(Pose2D(0.0, LEFT_MOVE, 0.0)), transitions={'succeeded': 'MOVE_TO_FRONT'})
+            
+            StateMachine.add('MOVE_TO_FRONT', MoveToState(Pose2D(FRONT_MOVE, 0.0, 0.0)), transitions={'succeeded': 'SAY_CHECKING_FIRES'})
 
-            text = 'I will check any fire is lit.'
-            StateMachine.add('SAY_CHECKING_FIRES', SpeechState(text=text, blocking=False), transitions={'succeeded': 'TURN_TO_TABLE'})
+            text = 'I will check if any fire is lit.'
+            StateMachine.add('SAY_CHECKING_FIRES', SpeechState(text=text, blocking=False), transitions={'succeeded': 'LOOK_AT_STOVE'})
 
             StateMachine.add('LOOK_AT_STOVE', JointAngleState(['HeadPitch', 'RElbowRoll', 'LElbowRoll'], [0.35, 0.05, -0.05]),
-                             transitions={'succeeded': 'DISABLE_ARM_WALK'})
+                             transitions={'succeeded': 'CHECK_FIRE'})
 
-            StateMachine.add('DISABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=False, rightArmEnabled=False),
-                             transitions={'succeeded': 'LATERAL_TO_FIRE'})
+            #StateMachine.add('DISABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=False, rightArmEnabled=False),
+            #                 transitions={'succeeded': 'LATERAL_TO_FIRE'})
 
-            StateMachine.add('LATERAL_TO_FIRE', MoveToState(Pose2D(0.0, DISTANCE_MARKER_TO_FIRE, 0.0)), transitions={'succeeded': 'CHECK_FIRE'})
+            #StateMachine.add('LATERAL_TO_FIRE', MoveToState(Pose2D(0.0, DISTANCE_MARKER_TO_FIRE, 0.0)), transitions={'succeeded': 'CHECK_FIRE'})
 
             StateMachine.add('CHECK_FIRE', ReadTopicFire(), 
-                             transitions={'succeeded': 'PREPARE_TEXT_AND_MOVEMENT'}, remapping={'plate': 'plate'})
+                             transitions={'succeeded': 'PREPARE_TEXT_AND_MOVEMENT', 'aborted': 'SAY_NO_FIRE_LIT'}, remapping={'plate': 'plate'})
 
             def prep_text(ud):
                 ud.out_text = "The %s fire is lit! I will put it off." % ud.plate.lower()
@@ -90,12 +93,28 @@ class PutOffFireSM(StateMachine):
                               transitions={'succeeded':'SAY_FIRE_LIT'}, remapping={'out_text':'text', 'objective': 'objective'})
           
             StateMachine.add('SAY_FIRE_LIT', SpeechState(blocking=False), remapping={'text': 'text'}, 
-                             transitions={'succeeded': 'MOVE_TO_BUTTON'})
+                             transitions={'succeeded': 'PREPARE_EXECUTE'})
 
-            StateMachine.add('MOVE_TO_BUTTON', MoveToState(), transitions={'succeeded': 'PUT_OFF_FIRE_MOVEMENT'},
-                             remapping={'objective': 'objective'})
+            def prep_execute_putoff(ud):
+                if ud.plate == "UPPER":
+                    return 'upper'
+                else:
+                    return 'lower'
+                return 'succeeded'
 
-            StateMachine.add('PUT_OFF_FIRE_MOVEMENT', ExecuteBehavior(behavior_name='put_off_fire'), transitions={'succeeded':'SAY_FINISH'})
+            StateMachine.add('PREPARE_EXECUTE', CBState(prep_execute_putoff, outcomes=['upper', 'lower', 'succeeded'], 
+                              input_keys=['plate']),
+                              transitions={'succeeded':'SAY_NO_FIRE_LIT', 'lower': 'PUT_OFF_LOWER_FIRE_MOVEMENT', 'upper': 'PUT_OFF_UPPER_FIRE_MOVEMENT'}, 
+                              #transitions={'lower': 'succeeded', 'upper':'succeeded'},
+                              remapping={'out_text':'text', 'objective': 'objective'})
+
+            #StateMachine.add('MOVE_TO_BUTTON', MoveToState(), transitions={'succeeded': 'PUT_OFF_FIRE_MOVEMENT'},
+            #                 remapping={'objective': 'objective'})
+
+            StateMachine.add('PUT_OFF_UPPER_FIRE_MOVEMENT', ExecuteBehavior(behavior_name='putoff_upper_fire'), transitions={'succeeded':'SAY_FINISH'})
+            StateMachine.add('PUT_OFF_LOWER_FIRE_MOVEMENT', ExecuteBehavior(behavior_name='putoff_lower_fire'), transitions={'succeeded':'SAY_FINISH'})
+
+            StateMachine.add('SAY_NO_FIRE_LIT', SpeechState(text='I am done as no fire is lit.', blocking=True), transitions={'succeeded': 'GO_BACK'})
 
             text = 'I am done, there is no need to call the fire department!'
             StateMachine.add('SAY_FINISH', SpeechState(text=text, blocking=False), transitions={'succeeded': 'GO_BACK'})
@@ -108,7 +127,7 @@ class PutOffFireSM(StateMachine):
 if __name__ == '__main__':
     rospy.init_node('HUMABOT_TOMATO_TEST')
  
-    TOPIC_LIST_NAMES = ['/nao_square','/nao_tomato','/nao_camera/image_raw']
+    TOPIC_LIST_NAMES = ['/nao_tomato','/nao_camera/image_raw']
     SERVICES_LIST_NAMES = ['/cmd_pose_srv']
     ACTION_LIST_NAMES = ['/speech','/joint_angles_action']
     PARAMS_LIST_NAMES = []
@@ -124,7 +143,7 @@ if __name__ == '__main__':
         StateMachine.add('ENABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=True, rightArmEnabled=True),
                          transitions={'succeeded': 'START_THE_TEST'})
 
-        StateMachine.add('START_THE_TEST', StartTest(testName='Put off the fire', dist_m_to_square=DISTANCE_TO_MARKER),
+        StateMachine.add('START_THE_TEST', StartTest(testName='Put off the fire', dist_m_to_square=DISTANCE_TO_MARKER,  go_to_square=False),
                          transitions={'succeeded': 'PUT_OFF_FIRE'})
 
         StateMachine.add('PUT_OFF_FIRE', PutOffFireSM(), transitions={'succeeded':'HomeOFF'})

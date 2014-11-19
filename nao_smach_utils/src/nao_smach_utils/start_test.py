@@ -8,11 +8,11 @@ from navigation_states import GoToSquare
 from go_to_posture_state import GoToPostureState
 
 class StartTest(StateMachine):
-    def __init__(self, testName='first', dist_m_to_square=0.50):
+    def __init__(self, testName='first', dist_m_to_square=0.50, go_to_square=True):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted']) 
 
         with self:
-            #StateMachine.add('HOME_ON', HomeOn_SM(startPose='Sit'), transitions={'succeeded': 'SAY_WAITING'})
+            StateMachine.add('HOME_ON', HomeOn_SM(startPose='Crouch'), transitions={'succeeded': 'SAY_WAITING'})
 
             text = '%s test start. To proceed please touch my head.' % testName
             StateMachine.add('SAY_WAITING', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})
@@ -22,7 +22,8 @@ class StartTest(StateMachine):
             text = 'Nobody touched my head in 30 seconds! Please touch my head.'
             StateMachine.add('SAY_NO_TOUCH', SpeechState(text=text, blocking=True), transitions={'succeeded':'WAIT_HEAD'})
             
-            StateMachine.add('STAND_INIT', GoToPostureState('StandInit', 0.8), transitions={'succeeded': 'GO_TO_SQUARE'})
+            StateMachine.add('STAND_INIT', GoToPostureState('StandInit', 0.8),
+                             transitions={'succeeded': 'GO_TO_SQUARE' if go_to_square else 'succeeded'})
                         
             text = "I'm going to the tag"
             StateMachine.add('SAY_GOING_TO_TAG', SpeechState(text=text, blocking=False), transitions={'succeeded':'WAIT_HEAD'})

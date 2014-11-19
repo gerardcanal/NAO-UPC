@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import math
-from smach import StateMachine, CBState
+from smach import StateMachine, CBState, State
 from nao_smach_utils.start_test import StartTest
 from nao_smach_utils.move_to_state import MoveToState
 from geometry_msgs.msg import Pose2D
@@ -12,31 +12,53 @@ from nao_smach_utils.set_arms_walking_state import SetArmsWalkingState
 from nao_smach_utils.navigation_states import ReadTopicSquare, transform_pose
 from nao_smach_utils.execute_choregraphe_behavior_state import ExecuteBehavior
 from nao_smach_utils.check_nodes import CheckNodesState
+from nao_smach_utils.navigation_states import ReadTopicSquare
+
 
 DISTANCE_TO_PAN = 0.25 # METRES
-APPROACH_TABLE_DIST = 0.1 # METERS
+APPROACH_TABLE_DIST = 0.20 # METERS
 DISTANCE_TO_MARKER = 0.52 # METERS
 ALMOST_ZERO = 0.01
+TURN_TO_TABLE_ANGLE = -math.pi/2
+OFFSET_TABLE = 0.06
 
 class MealPreparationSM(StateMachine):
     def __init__(self):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
 
         with self:
+            StateMachine.add('STEP_LEFT', MoveToState(objective=Pose2D(0.0, 0.10, 0.0)), transitions={'succeeded': 'SAY_TURNTABLE'})
 
             text = 'I will check the table to look for a tomato'
             StateMachine.add('SAY_TURNTABLE', SpeechState(text=text, blocking=False), transitions={'succeeded': 'TURN_TO_TABLE'})
+            
+            StateMachine.add('TURN_TO_TABLE', MoveToState(objective=Pose2D(0.0, 0.0, TURN_TO_TABLE_ANGLE)), transitions={'succeeded': 'LOOK_AT_TABLE'})
 
-            StateMachine.add('TURN_TO_TABLE', MoveToState(objective=Pose2D(0.0, 0.0, -math.pi/2)), transitions={'succeeded': 'LOOK_AT_TABLE'})
-
-            StateMachine.add('LOOK_AT_TABLE', JointAngleState(['HeadPitch', 'RElbowRoll', 'LElbowRoll'], [0.35, 0.05, -0.05]), transitions={'succeeded': 'DISABLE_ARM_WALK'})
+            StateMachine.add('LOOK_AT_TABLE', JointAngleState(['HeadPitch', 'RElbowRoll', 'LElbowRoll'], [0.15, 0.05, -0.05]), transitions={'succeeded': 'DISABLE_ARM_WALK'})
 
             StateMachine.add('DISABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=False, rightArmEnabled=False),
                              transitions={'succeeded': 'SCAN_TABLE'})
 
-            StateMachine.add('SCAN_TABLE', ScanTable(), transitions={'succeeded': 'APPROACH_TABLE'})
+            StateMachine.add('SCAN_TABLE', ScanTable(), transitions={'succeeded': 'LOOK_AT_SQUARE'})
 
-            StateMachine.add('APPROACH_TABLE', MoveToState(objective=Pose2D(APPROACH_TABLE_DIST, 0.0, 0.0)), 
+            StateMachine.add('LOOK_AT_SQUARE', JointAngleState(['HeadPitch'], [0.5]), transitions={'succeeded': 'READ_SQUARE'})
+            StateMachine.add('READ_SQUARE', ReadTopicSquare(), 
+                             transitions={'succeeded': 'PREPARE_APPROACH','aborted':'APPROACH_TABLE_HARD'}, remapping={'square': 'square'})
+
+            def put_approach_obj(ud):
+                #transf_square = transform_pose(Pose2D(ud.square.z, ud.square.x, 0.0))
+                ud.objective = Pose2D(max(abs(ud.square.z)-OFFSET_TABLE, 0.0), 0.0, 0.0)
+                #raw_input( '******************' + str(Pose2D(max(abs(transf_square.x)-OFFSET_TABLE, 0.0), 0.0, 0.0)) )
+                return 'succeeded'
+            StateMachine.add('PREPARE_APPROACH', CBState(put_approach_obj, input_keys=['square'], output_keys=['objective'], outcomes=['succeeded']), 
+                             transitions={'succeeded':'APPROACH_TABLE'}, remapping={'objective': 'objective'})
+
+            StateMachine.add('APPROACH_TABLE', MoveToState(), 
+                             transitions={'succeeded': 'LOOK_A_LITTLE_DOWN'})
+
+            StateMachine.add('LOOK_A_LITTLE_DOWN', JointAngleState(['HeadPitch'], [0.12]), transitions={'succeeded': 'SAY_GRASP'})
+
+            StateMachine.add('APPROACH_TABLE_HARD', MoveToState(objective=Pose2D(APPROACH_TABLE_DIST, 0.0, 0.0)), 
                              transitions={'succeeded': 'SAY_GRASP'})
 
             text = 'Look this is a tomato! I will try to grasp it!'
@@ -57,7 +79,7 @@ class MealPreparationSM(StateMachine):
 
 class ScanTable(StateMachine):
     ''' Moves laterally until it finds the tomato '''
-    def __init__(self, min_y_step=-0.15, table_length=0.4): # 0.635 table length
+    def __init__(self, min_y_step=-0.10, table_length=0.3): # 0.635 table length
         StateMachine.__init__(self, outcomes=['succeeded', 'aborted', 'preempted'])
         self._moved = 0
         #############################################
@@ -119,7 +141,7 @@ if __name__ == '__main__':
         StateMachine.add('ENABLE_ARM_WALK', SetArmsWalkingState(leftArmEnabled=True, rightArmEnabled=True),
                          transitions={'succeeded': 'START_THE_TEST'})
 
-        StateMachine.add('START_THE_TEST', StartTest(testName='Meal preparation', dist_m_to_square=DISTANCE_TO_MARKER),
+        StateMachine.add('START_THE_TEST', StartTest(testName='Meal preparation', dist_m_to_square=DISTANCE_TO_MARKER, go_to_square=False),
                          transitions={'succeeded': 'MEAL_PREPARATION'})
 
         StateMachine.add('MEAL_PREPARATION', MealPreparationSM(), transitions={'succeeded':'HomeOFF'})
