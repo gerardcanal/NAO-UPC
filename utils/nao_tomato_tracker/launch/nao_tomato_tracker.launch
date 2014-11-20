@@ -2,7 +2,7 @@
 
   <param name="Tuning" value="True" type="bool" />
   <param name="lowerH" value="145" type="int" />
-  <param name="lowerS" value="0" type="int" />
+  <param name="lowerS" value="100" type="int" />
   <param name="lowerV" value="0" type="int" />
   <param name="upperH" value="255" type="int" />
   <param name="upperS" value="255" type="int" />

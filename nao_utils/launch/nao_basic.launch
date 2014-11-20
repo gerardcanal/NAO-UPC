@@ -6,7 +6,8 @@
     For a remote connection, change IP and port accordingly in the NAO_IP and NAO_PORT 
     environment variables.
   -->
-  
+  <param name="/nao_walker/use_foot_gait_config" value="True" />
+  <param name="/nao_walker/foot_gait_config" value="0.5" />
   <!-- 
   	This pushes the local PYTHONPATH into the launch file, so that the NaoQI API is found.
     You need to add the Nao's API dir to your PYTHONPATH so that the modules are found.

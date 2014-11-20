@@ -16,7 +16,7 @@ from nao_smach_utils.navigation_states import ReadTopicSquare
 
 
 DISTANCE_TO_PAN = 0.25 # METRES
-APPROACH_TABLE_DIST = 0.20 # METERS
+APPROACH_TABLE_DIST = 0.35 # METERS
 DISTANCE_TO_MARKER = 0.52 # METERS
 ALMOST_ZERO = 0.01
 TURN_TO_TABLE_ANGLE = -math.pi/2
