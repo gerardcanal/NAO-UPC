@@ -1,7 +1,7 @@
 <launch>
 
   <param name="Tuning" value="True" type="bool" />
-  <param name="lowerH" value="90" type="int" />
+  <param name="lowerH" value="0" type="int" />
   <param name="lowerS" value="115" type="int" />
   <param name="lowerV" value="120" type="int" />
   <param name="upperH" value="195" type="int" />

@@ -95,8 +95,13 @@ public:
     nao_tomato_tracker::HotPlate hot_plate;
    
     // something found, then publish
-    if ( area != -1 )
+    if ( area != -1 && obj_pos.x != 0 && obj_pos.y != 0)
     {
+        std::cout << area << std::endl;
+        std::cout << obj_pos.x << std::endl;
+        std::cout << obj_pos.y << std::endl;
+        std::cout << "*******" << std::endl;
+
         point.x = (img_out.rows/2-obj_pos.x)/1800;
         point.y = (img_out.cols/2-obj_pos.y)/1800;
         point.z = 0;

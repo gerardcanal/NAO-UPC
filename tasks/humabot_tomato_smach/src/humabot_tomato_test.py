@@ -110,7 +110,8 @@ class ScanTable(StateMachine):
 
             def put_obj(ud):
                 transf_tomato = Pose2D(ud.tomato.y, ud.tomato.x, 0.0) #transform_pose(Pose2D(ud.tomato.x, ud.tomato.y, 0.0))
-                if (transf_tomato.y <= ALMOST_ZERO):
+                raw_input('***********' + str(transf_tomato) + '  ' + str(abs(transf_tomato.y) <= ALMOST_ZERO) )
+                if (abs(transf_tomato.y) <= ALMOST_ZERO):
                     return 'in_front'
                 obj = Pose2D(0.0, transf_tomato.y, 0.0)
 

@@ -9,7 +9,7 @@ from nao_smach_utils.home_onoff import HomeOff_SM
 from nao_smach_utils.move_to_state import MoveToState
 from nao_smach_utils.joint_trajectory_state import JointAngleState
 from nao_smach_utils.shopping_list_state import ShoppingListState
-from go_to_posture_state import GoToPostureState
+from nao_smach_utils.go_to_posture_state import GoToPostureState
 from geometry_msgs.msg import Pose2D
 
 DISTANCE_TO_OBJECT_RECOGNITION = 0.2
@@ -102,23 +102,29 @@ if __name__ == '__main__':
 
     # Define needed nodes
     # Nodes names to check
-    TOPIC_LIST_NAMES = ['/nao_square','/nao_camera/image_raw']
+    TOPIC_LIST_NAMES = ['/nao_camera/image_raw']
     SERVICES_LIST_NAMES = ['/nao_shopping_list/checkObjects','/nao_shopping_list/trainObjects','/cmd_pose_srv']
     ACTION_LIST_NAMES = ['/speech','/joint_angles_action']
     PARAMS_LIST_NAMES = []
  
     # Create a SMACH state machine
     sm = StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
+    shoplistsm = DoShoppingListSM()
 
     with sm:
 
         StateMachine.add('CHECK_NODES', CheckNodesState(TOPIC_LIST_NAMES, SERVICES_LIST_NAMES, ACTION_LIST_NAMES, PARAMS_LIST_NAMES),
-                         transitions={'succeeded':'SHOPING_LIST_SM','aborted':'aborted'})
+                         transitions={'succeeded':'START_THE_TEST','aborted':'aborted'})
 
-        #StateMachine.add('START_THE_TEST', StartTest(testName='Shopping list', dist_m_to_square=0.4), transitions={'succeeded': 'SHOPING_LIST_SM'})
+        StateMachine.add('START_THE_TEST', StartTest(testName='Shopping list', dist_m_to_square=0.4, go_to_square=False), transitions={'succeeded': 'SHOPING_LIST_SM'})
 
-        StateMachine.add('SHOPING_LIST_SM', DoShoppingListSM(), transitions={'succeeded':'HomeOFF'})
+        StateMachine.add('SHOPING_LIST_SM', shoplistsm, transitions={'succeeded':'HomeOFF'})
 
         StateMachine.add('HomeOFF', HomeOff_SM(), transitions={'succeeded': 'succeeded'})
 
     sm.execute()
+    print '###############################################'
+    print '###############################################'
+    print shoplistsm.userdata.shopping_list
+    print '###############################################'
+    print '###############################################'

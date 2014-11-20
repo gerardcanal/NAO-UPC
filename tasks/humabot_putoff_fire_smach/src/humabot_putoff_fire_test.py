@@ -56,11 +56,14 @@ class ReadTopicFire(State):
 
 LEFT_MOVE = 0.14
 FRONT_MOVE = 0.27
-REORIENT_RAD = -15
+REORIENT_RAD = -0.2
+REORIENT_FIRE = -0.35
 
 class PutOffFireSM(StateMachine):
     def __init__(self):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
+        self.turn_rad = REORIENT_RAD
+
 
         with self:
             StateMachine.add('MOVE_LEFT', MoveToState(Pose2D(0.0, LEFT_MOVE, 0.0)), transitions={'succeeded': 'MOVE_TO_FRONT'})
@@ -79,7 +82,9 @@ class PutOffFireSM(StateMachine):
             #StateMachine.add('LATERAL_TO_FIRE', MoveToState(Pose2D(0.0, DISTANCE_MARKER_TO_FIRE, 0.0)), transitions={'succeeded': 'CHECK_FIRE'})
 
             StateMachine.add('CHECK_FIRE', ReadTopicFire(), 
-                             transitions={'succeeded': 'PREPARE_TEXT_AND_MOVEMENT', 'aborted': 'SAY_NO_FIRE_LIT'}, remapping={'plate': 'plate'})
+                             transitions={'succeeded': 'PREPARE_TEXT_AND_MOVEMENT', 'aborted': 'REORIENT_FIRE'}, remapping={'plate': 'plate'})
+
+            StateMachine.add('REORIENT_FIRE', MoveToState(Pose2D(0.0, 0.0, REORIENT_FIRE)), transitions={'succeeded': 'CHECK_FIRE'})
 
             def prep_text(ud):
                 ud.out_text = "The %s fire is lit! I will put it off." % ud.plate.lower()
@@ -118,9 +123,17 @@ class PutOffFireSM(StateMachine):
             StateMachine.add('RE_CHECK', ReadTopicFire(), 
                              transitions={'succeeded': 'SAY_FAILED', 'aborted': 'SAY_FINISH'}, remapping={'plate': 'plate'})
 
-            StateMachine.add('SAY_FAILED', SpeechState(text='Oh I failed!', blocking=False), transitions={'succeeded': 'REORIENT'})
+            StateMachine.add('SAY_FAILED', SpeechState(text='Oh I failed!', blocking=False), transitions={'succeeded': 'PREPARE_REORIENT'})
 
-            StateMachine.add('REORIENT', MoveToState(Pose2D(0.0,0.0, REORIENT_RAD)), transitions={'succeeded': 'REPUTOFF'})
+            def prep_reorientcheck(ud):
+                ud.objective = Pose2D(0.0, 0.0, self.turn_rad)
+                self.turn_rad = -self.turn_rad
+                return 'succeeded'
+
+            StateMachine.add('PREPARE_REORIENT', CBState(prep_reorientcheck, outcomes=['succeeded'], output_keys=['objective']),
+                             transitions={'succeeded': 'REORIENT'})
+
+            StateMachine.add('REORIENT', MoveToState(), transitions={'succeeded': 'PUT_OFF_UPPER_FIRE_MOVEMENT'})
 
             StateMachine.add('REPUTOFF', ExecuteBehavior(behavior_name='putoff_upper_fire'), transitions={'succeeded':'LAST_CHECK'})
 
