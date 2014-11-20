@@ -84,7 +84,7 @@ void TomatoTracker::trackObject(const cv::Mat &imgThresholded, cv::Point2f &obj_
 		cv::Moments mu = cv::moments(contour, true); 
 
 		//Get the mass center:
-		if (mu.m00 > 1000) 
+		if (mu.m00 > 2000) 
 		{ //if radius<2000 is noise
 			obj_pos = cv::Point2f(static_cast<float>(mu.m10/mu.m00) , static_cast<float>(mu.m01/mu.m00));
 			area = areas[0].area;

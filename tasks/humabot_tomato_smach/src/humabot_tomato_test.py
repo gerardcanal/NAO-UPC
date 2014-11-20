@@ -16,7 +16,7 @@ from nao_smach_utils.navigation_states import ReadTopicSquare
 
 
 DISTANCE_TO_PAN = 0.25 # METRES
-APPROACH_TABLE_DIST = 0.20 # METERS
+APPROACH_TABLE_DIST = 0.26 # METERS
 DISTANCE_TO_MARKER = 0.52 # METERS
 ALMOST_ZERO = 0.01
 TURN_TO_TABLE_ANGLE = -math.pi/2
@@ -110,7 +110,8 @@ class ScanTable(StateMachine):
 
             def put_obj(ud):
                 transf_tomato = Pose2D(ud.tomato.y, ud.tomato.x, 0.0) #transform_pose(Pose2D(ud.tomato.x, ud.tomato.y, 0.0))
-                if (transf_tomato.y <= ALMOST_ZERO):
+                raw_input('***********' + str(transf_tomato) + '  ' + str(abs(transf_tomato.y) <= ALMOST_ZERO) )
+                if (abs(transf_tomato.y) <= ALMOST_ZERO):
                     return 'in_front'
                 obj = Pose2D(0.0, transf_tomato.y, 0.0)
 
