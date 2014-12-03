@@ -43,7 +43,8 @@ class SpeechState_NonBlocking(smach.State):
         if not text:
             input_keys = ['text']
         # Note: it seems that not passing the queue_size() makes it work synchronously and doesn't loose messages
-        self._pub = rospy.Publisher('/speech', String, latch=True)
+        self._pub = rospy.Publisher('/speech', String, latch=True, queue_size=10)
+        #rospy.sleep(0.5)
         smach.State.__init__(self, outcomes=['succeeded'], input_keys=input_keys)
 
     def execute(self, userdata):
@@ -52,5 +53,27 @@ class SpeechState_NonBlocking(smach.State):
         # Try to publish until the publisher is not connected to the topic
         #while self._pub.get_num_connections() == 0:
         self._pub.publish(String(self._text))
+        rospy.sleep(0.2) # give time to publish
         rospy.loginfo("The published message to say is: %s" % String(self._text).data)
         return 'succeeded'
+
+
+if __name__ == '__main__':
+    import sys
+    rospy.init_node('TTS_STATE_TEST')
+    sm = smach.StateMachine(outcomes=['succeeded', 'preempted', 'aborted'])
+
+    # Wrap command line arguments
+    blocking = True
+    if len(sys.argv) == 1:
+        text="This is a test text"
+    elif len(sys.argv) == 2:
+        text=str(sys.argv[1])
+    else:
+        text=str(sys.argv[1])
+        blocking=False
+    print "Parameters are: text =", text, " blocking =", blocking
+
+    with sm:
+        smach.StateMachine.add('TTS', SpeechState(text, blocking), transitions={'succeeded': 'succeeded'})
+    sm.execute()
