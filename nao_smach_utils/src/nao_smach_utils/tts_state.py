@@ -71,7 +71,7 @@ if __name__ == '__main__':
         text=str(sys.argv[1])
     else:
         text=str(sys.argv[1])
-        blocking=False
+        blocking=sys.argv[2] in ['true', '1', 't', 'y', 'yes']
     print "Parameters are: text =", text, " blocking =", blocking
 
     with sm:
