@@ -2,7 +2,7 @@
 import rospy
 import sys
 from smach_ros import SimpleActionState
-from nao_msgs.msg import BodyPoseWithSpeedAction, BodyPoseWithSpeedGoal
+from naoqi_msgs.msg import BodyPoseWithSpeedAction, BodyPoseWithSpeedGoal
 
 class GoToPostureState(SimpleActionState):
     ''' Puts the NAO robot in a posture from http://doc.aldebaran.com/1-14/naoqi/motion/alrobotposture.html#term-predefined-postures '''

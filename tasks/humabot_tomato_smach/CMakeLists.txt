@@ -5,8 +5,8 @@ project(humabot_tomato_smach)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  nao_msgs
-  nao_driver
+  naoqi_msgs
+  naoqi_driver
   nao_smach_utils
   nao_tomato_tracker
   nao_utils
@@ -71,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   nao_msgs
+#   naoqi_msgs
 # )
 
 ###################################
@@ -86,7 +86,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES humabot_tomato_smach
-#  CATKIN_DEPENDS nao_msgs nao_robot nao_smach_utils nao_tomato_tracker nao_utils smach smach_ros
+#  CATKIN_DEPENDS naoqi_msgs nao_robot nao_smach_utils nao_tomato_tracker nao_utils smach smach_ros
 #  DEPENDS system_lib
 )
 

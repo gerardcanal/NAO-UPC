@@ -1,14 +1,14 @@
 <launch>
     <!-- % rxconsole -->
     <node pkg="rqt_console" name="rqt_console" type="rqt_console"/>
-    <!--<include file="$(find nao_sensors)/launch/camera.launch" />-->
+    <!--<include file="$(find naoqi_sensors)/launch/camera.launch" />-->
     <!-- % rosrun image_view image_view image:=/camera/image_raw -->
-    <node pkg="image_view" type="image_view" name="my_image_raw_viewer" args="image:=/nao_camera/image_raw"/>
+    <node pkg="image_view" type="image_view" name="my_image_raw_viewer" args="image:=/nao_robot/camera/top/camera/image_raw"/>
 
     <arg name="calibration_path" default="calibration.ini" />
     <group ns="visp_camera_calibration">
             <node pkg="visp_camera_calibration" name="visp_camera_calibration_calibrator" type="visp_camera_calibration_calibrator"/>
-            <node pkg="visp_camera_calibration" name="visp_camera_calibration_image_processing" type="visp_camera_calibration_image_processing" args="camera_prefix:=/nao_camera">
+            <node pkg="visp_camera_calibration" name="visp_camera_calibration_image_processing" type="visp_camera_calibration_image_processing" args="camera_prefix:=/nao_robot/camera/top">
                   <param name="gray_level_precision" value="0.5" />
                   <param name="size_precision" value="0.2" />
                   <param name="pause_at_each_frame" value="False" />

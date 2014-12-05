@@ -13,7 +13,7 @@ from smach_ros import SimpleActionState
 import tf
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, Point, Quaternion
-from nao_msgs.msg import FollowPathAction, FollowPathGoal
+from naoqi_msgs.msg import FollowPathAction, FollowPathGoal
 
 class FollowPathState(SimpleActionState):
 

@@ -5,8 +5,8 @@ project(nao_visp)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  nao_driver
-  nao_sensors
+  naoqi_driver
+  naoqi_sensors
   std_msgs
   visp_camera_calibration
   visp_auto_tracker
@@ -84,7 +84,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nao_visp
-#  CATKIN_DEPENDS nao_driver nao_sensors std_msgs vision_visp
+#  CATKIN_DEPENDS naoqi_driver naoqi_sensors std_msgs vision_visp
 #  DEPENDS system_lib
 )
 

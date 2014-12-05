@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import sys
-from nao_msgs.msg import TactileTouch, Bumper
+from naoqi_msgs.msg import TactileTouch, Bumper
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist, Vector3
 from sensor_msgs.msg import Range

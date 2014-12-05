@@ -4,7 +4,7 @@ import smach
 
 from smach_ros import SimpleActionState
 from std_msgs.msg import String
-from nao_msgs.msg import SpeechWithFeedbackAction, SpeechWithFeedbackGoal
+from naoqi_msgs.msg import SpeechWithFeedbackAction, SpeechWithFeedbackGoal
 
 #Wrapper to the startwalking states for the blocking and non blocking
 def SpeechState(text=None, blocking=True):

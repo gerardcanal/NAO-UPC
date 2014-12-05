@@ -5,7 +5,7 @@ import threading
 
 from smach_ros import ServiceState
 from std_srvs.srv import Empty
-from nao_msgs.msg import WordRecognized
+from naoqi_msgs.msg import WordRecognized
 
 class StartRecognitionState(ServiceState):
     def __init__(self):

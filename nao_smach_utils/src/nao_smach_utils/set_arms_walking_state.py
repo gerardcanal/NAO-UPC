@@ -1,7 +1,7 @@
 #!usr/bin/env python
 from smach_ros import ServiceState
-from nao_msgs.srv import SetArmsEnabledRequest
-from nao_msgs.srv import SetArmsEnabled
+from naoqi_msgs.srv import SetArmsEnabledRequest
+from naoqi_msgs.srv import SetArmsEnabled
 
 class SetArmsWalkingState(ServiceState):
     def __init__(self, leftArmEnabled=True, rightArmEnabled=True):

@@ -5,7 +5,7 @@ import smach
 from smach_ros import ServiceState
 from geometry_msgs.msg import Twist
 from std_srvs.srv import Empty
-from nao_msgs.srv import CmdVelService, CmdVelServiceRequest
+from naoqi_msgs.srv import CmdVelService, CmdVelServiceRequest
 
 #Wrapper to the startwalking states for the blocking and non blocking
 def StartWalkingState(twist_msg=None, blocking=True):

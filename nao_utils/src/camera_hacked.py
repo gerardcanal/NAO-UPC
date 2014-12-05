@@ -37,19 +37,19 @@ from collections import defaultdict
 from distutils.version import LooseVersion
 import rospy
 from sensor_msgs.msg import Image, CameraInfo
-from nao_driver.nao_driver_naoqi import NaoNode
+from naoqi_driver.naoqi_driver_naoqi import NaoNode
 import camera_info_manager
 
 from dynamic_reconfigure.server import Server
-from nao_sensors.cfg import NaoCameraConfig
+from naoqi_sensors.cfg import NaoCameraConfig
 
 # import resolutions
-from nao_sensors.vision_definitions import k960p, k4VGA, kVGA, kQVGA, kQQVGA
+from naoqi_sensors.vision_definitions import k960p, k4VGA, kVGA, kQVGA, kQQVGA
 # import color spaces
-from nao_sensors.vision_definitions import kYUV422ColorSpace, kYUVColorSpace, \
+from naoqi_sensors.vision_definitions import kYUV422ColorSpace, kYUVColorSpace, \
                     kRGBColorSpace, kBGRColorSpace, kDepthColorSpace
 # import extra parameters
-from nao_sensors.vision_definitions import kCameraSelectID, kCameraAutoExpositionID, kCameraAecAlgorithmID, \
+from naoqi_sensors.vision_definitions import kCameraSelectID, kCameraAutoExpositionID, kCameraAecAlgorithmID, \
                   kCameraContrastID, kCameraSaturationID, kCameraHueID, kCameraSharpnessID, kCameraAutoWhiteBalanceID, \
                   kCameraExposureID, kCameraGainID, kCameraBrightnessID, kCameraWhiteBalanceID
 
@@ -60,7 +60,7 @@ kDepthCamera = 2
 
 class NaoCam (NaoNode):
     def __init__(self):
-        NaoNode.__init__(self, 'nao_camera')
+        NaoNode.__init__(self, 'nao_robot/camera/top')
 
         self.camProxy = self.get_proxy("ALVideoDevice")
         if self.camProxy is None:
@@ -125,7 +125,7 @@ class NaoCam (NaoNode):
         if self.config['camera_info_url'] != new_config['camera_info_url'] and \
                         new_config['camera_info_url'] and new_config['camera_info_url'] not in self.camera_infos:
             if 'cim' not in self.__dict__:
-                self.cim = camera_info_manager.CameraInfoManager(cname='nao_camera')
+                self.cim = camera_info_manager.CameraInfoManager(cname='nao_robot/camera/top')
 
             if not self.cim.setURL( new_config['camera_info_url'] ):
                 rospy.logerr('malformed URL for calibration file')

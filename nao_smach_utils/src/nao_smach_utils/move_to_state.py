@@ -10,7 +10,7 @@ import rospy
 import smach
 
 from smach_ros import ServiceState
-from nao_msgs.srv import CmdPoseService, CmdPoseServiceRequest
+from naoqi_msgs.srv import CmdPoseService, CmdPoseServiceRequest
 from geometry_msgs.msg import Pose2D
 
 class MoveToState(ServiceState):

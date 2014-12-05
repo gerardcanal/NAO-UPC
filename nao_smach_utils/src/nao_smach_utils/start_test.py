@@ -2,7 +2,7 @@
 import rospy
 from smach import StateMachine, State
 from home_onoff import HomeOn_SM, HomeOff_SM
-from nao_msgs.msg import TactileTouch
+from naoqi_msgs.msg import TactileTouch
 from tts_state import SpeechState
 from navigation_states import GoToSquare
 from go_to_posture_state import GoToPostureState

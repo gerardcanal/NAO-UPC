@@ -113,7 +113,7 @@ include_directories(
  
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(shopping_list_node shopping_list_generate_messages_cpp)
+add_dependencies(nao_shopping_list_node nao_shopping_list_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries( nao_shopping_list_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} )

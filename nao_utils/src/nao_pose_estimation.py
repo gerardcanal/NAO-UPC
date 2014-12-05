@@ -222,8 +222,10 @@ class PoseEstimator:
 
     def __init__(self):
     	# scenario
-    	self.sBig = 0.0660
-    	self.sSmall = 0.0330
+        self.sBig = 0.1560
+        self.sSmall = 0.0770
+    	#self.sBig = 0.0660
+    	#self.sSmall = 0.0330
     	# our tag
     	#self.sBig = 0.0790
     	#self.sSmall = 0.039
@@ -317,7 +319,7 @@ class PoseEstimator:
         return tvec
 
 def main():
-    sq = SquareDetector(subs_topic='/nao_camera/image_raw', debug=True)
+    sq = SquareDetector(subs_topic='/nao_robot/camera/top/camera/image_raw', debug=True)
     rospy.init_node('square_detector', anonymous=True)
     try:
         rospy.spin()

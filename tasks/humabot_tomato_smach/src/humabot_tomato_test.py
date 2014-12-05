@@ -126,7 +126,7 @@ class ScanTable(StateMachine):
 if __name__ == '__main__':
     rospy.init_node('HUMABOT_TOMATO_TEST')
  
-    TOPIC_LIST_NAMES = ['/nao_square','/nao_tomato','/nao_camera/image_raw']
+    TOPIC_LIST_NAMES = ['/nao_square','/nao_tomato','/nao_robot/camera/top/camera/image_raw']
     SERVICES_LIST_NAMES = ['/cmd_pose_srv']
     ACTION_LIST_NAMES = ['/speech','/joint_angles_action']
     PARAMS_LIST_NAMES = []

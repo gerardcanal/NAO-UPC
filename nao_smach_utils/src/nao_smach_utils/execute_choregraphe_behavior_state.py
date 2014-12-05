@@ -2,8 +2,8 @@
 import rospy
 import sys
 from smach_ros import SimpleActionState
-from nao_msgs.srv import GetInstalledBehaviors
-from nao_msgs.msg import RunBehaviorAction, RunBehaviorGoal
+from naoqi_msgs.srv import GetInstalledBehaviors
+from naoqi_msgs.msg import RunBehaviorAction, RunBehaviorGoal
 
 class ExecuteBehavior(SimpleActionState):
     ''' Executes a choregraphe behavior which MUST be installed inside the NAO '''

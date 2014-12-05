@@ -18,8 +18,8 @@
     <param name="model_name" type="string" value="pattern" />
     <param name="debug_display" type="bool" value="True" />
 	      
-    <remap from="/visp_auto_tracker/camera_info" to="/nao_camera/camera_info"/>
-    <remap from="/visp_auto_tracker/image_raw" to="/nao_camera/image_raw"/>
+    <remap from="/visp_auto_tracker/camera_info" to="/nao_robot/camera/top/camera/camera_info"/>
+    <remap from="/visp_auto_tracker/image_raw" to="/nao_robot/camera/top/camera/image_raw"/>
   </node>
 
   <!-- Launch the usb camera acquisition node -->

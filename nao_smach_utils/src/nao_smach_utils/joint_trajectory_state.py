@@ -5,7 +5,7 @@ import smach
 
 from smach import StateMachine, State
 from smach_ros import SimpleActionState
-from nao_msgs.msg import JointAnglesWithSpeedAction, JointAnglesWithSpeedGoal
+from naoqi_msgs.msg import JointAnglesWithSpeedAction, JointAnglesWithSpeedGoal
 
 class JointAngleState(SimpleActionState):
     '''Joint state which publish an angle movement'''

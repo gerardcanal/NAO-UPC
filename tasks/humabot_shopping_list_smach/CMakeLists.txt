@@ -5,8 +5,8 @@ project(humabot_shopping_list_smach)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  nao_msgs
-  nao_driver
+  naoqi_msgs
+  naoqi_driver
   nao_smach_utils
   nao_tomato_tracker
   nao_utils

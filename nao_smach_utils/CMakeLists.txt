@@ -6,8 +6,8 @@ project(nao_smach_utils)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  nao_driver
-  nao_msgs
+  naoqi_driver
+  naoqi_msgs
   std_msgs
   geometry_msgs
   humanoid_nav_msgs
@@ -72,7 +72,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   nao_msgs
+#   naoqi_msgs
 # )
 
 ###################################
@@ -87,7 +87,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nao_smach_utils
-#  CATKIN_DEPENDS nao_driver nao_msgs smach smach_ros
+#  CATKIN_DEPENDS naoqi_driver naoqi_msgs smach smach_ros
 #  DEPENDS system_lib
 )
 

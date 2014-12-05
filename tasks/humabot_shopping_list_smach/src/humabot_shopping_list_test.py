@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
     # Define needed nodes
     # Nodes names to check
-    TOPIC_LIST_NAMES = ['/nao_camera/image_raw']
+    TOPIC_LIST_NAMES = ['/nao_robot/camera/top/camera/image_raw']
     SERVICES_LIST_NAMES = ['/nao_shopping_list/checkObjects','/nao_shopping_list/trainObjects','/cmd_pose_srv']
     ACTION_LIST_NAMES = ['/speech','/joint_angles_action']
     PARAMS_LIST_NAMES = []

@@ -8,8 +8,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   geometry_msgs
   humanoid_nav_msgs
-  nao_driver
-  nao_msgs
+  naoqi_driver
+  naoqi_msgs
   smach
   smach_ros
   std_msgs
@@ -72,7 +72,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   geometry_msgs#   humanoid_nav_msgs#   nao_msgs#   std_msgs
+#   geometry_msgs#   humanoid_nav_msgs#   naoqi_msgs#   std_msgs
 # )
 
 ###################################
@@ -87,7 +87,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nao_utils
-#  CATKIN_DEPENDS geometry_msgs humanoid_nav_msgs nao_driver nao_msgs smach smach_ros std_msgs
+#  CATKIN_DEPENDS geometry_msgs humanoid_nav_msgs naoqi_driver naoqi_msgs smach smach_ros std_msgs
 #  DEPENDS system_lib
 )
 
