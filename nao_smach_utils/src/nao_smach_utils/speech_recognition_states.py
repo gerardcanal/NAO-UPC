@@ -42,6 +42,7 @@ class GetRecognizedWord(smach.State): #FIXME should be tested to see when the in
             if self._timeout is not None or self._timeout > 0:
                 time_running = rospy.Time.now() - start_time
                 if time_running > rospy.Duration(self._timeout):
+                    subs.unregister()
                     return 'timeouted'
         subs.unregister()
 
