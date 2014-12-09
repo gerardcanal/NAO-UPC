@@ -19,7 +19,9 @@
 
   
   <!-- Specify here all dependent settings (default top) -->
-  <include file="$(find naoqi_sensors)/launch/camera.launch" ns="nao_robot/camera/top" />
+  <include file="$(find naoqi_sensors)/launch/camera.launch" ns="nao_robot/camera/top">
+    <arg name="resolution" value="2" />
+  </include>
   <include file="$(find naoqi_sensors)/launch/sonar.launch" />
 
   <include file="$(find nao_apps)/launch/nao_speech.launch" />
