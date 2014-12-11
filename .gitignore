@@ -26,3 +26,4 @@
 *.out
 *.app
 
+CATKIN_IGNORE
