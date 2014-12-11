@@ -7,15 +7,18 @@ from smach_ros import ServiceState
 from std_srvs.srv import Empty
 from naoqi_msgs.msg import WordRecognized
 
+
 class StartRecognitionState(ServiceState):
     def __init__(self):
         ServiceState.__init__(self, '/start_recognition', Empty)
+
 
 class StopRecognitionState(ServiceState):
     def __init__(self):
         ServiceState.__init__(self, '/stop_recognition', Empty)
 
-class GetRecognizedWord(smach.State): #FIXME should be tested to see when the information is published
+
+class GetRecognizedWord(smach.State):  # FIXME should be tested to see when the information is published
     def __init__(self, timeout=None):
         ''' timeout is the time in seconds in which the node will stop waiting for the topic to be published. '''
         smach.State.__init__(self, outcomes=['succeeded', 'timeouted'], output_keys=['recognized_words'])

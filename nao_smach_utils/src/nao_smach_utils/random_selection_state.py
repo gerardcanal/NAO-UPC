@@ -4,6 +4,7 @@ import rospy
 from smach import State
 from random import randrange
 
+
 class RandomSelectionFromPoolState(State):
     ''' pool is a list with the objects to be selected. Max_tries the maximum number of random tries before giving up and repeating the last one
         output_key selected_item is the randomly selected item from the list.
@@ -14,7 +15,6 @@ class RandomSelectionFromPoolState(State):
         self._lenpool = len(pool)
         self._lastSelection = None
         self._MAX_TRIES = max_tries
-
 
     def execute(self, userdata):
         selection = randrange(self._lenpool)
@@ -29,4 +29,3 @@ class RandomSelectionFromPoolState(State):
         self._lastSelection = selection
         userdata.selected_item = self._pool[selection]
         return 'succeeded'
-

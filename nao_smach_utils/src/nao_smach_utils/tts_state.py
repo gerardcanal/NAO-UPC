@@ -7,12 +7,14 @@ from std_msgs.msg import String
 from naoqi_msgs.msg import SpeechWithFeedbackAction, SpeechWithFeedbackGoal
 from random_selection_state import RandomSelectionFromPoolState
 
+
 #Wrapper to the startwalking states for the blocking and non blocking
 def SpeechState(text=None, blocking=True):
     if not blocking:
         return SpeechState_NonBlocking(text)
     else:
         return SpeechState_Blocking(text)
+
 
 class SpeechState_Blocking(SimpleActionState):
     '''Speech state with a call to the ActionServer'''
@@ -57,18 +59,18 @@ class SpeechState_NonBlocking(smach.State):
         # Try to publish until the publisher is not connected to the topic
         #while self._pub.get_num_connections() == 0:
         self._pub.publish(String(text_to_say))
-        rospy.sleep(0.2) # give time to publish
+        rospy.sleep(0.2)  # give time to publish
         rospy.loginfo("The published message to say is: %s" % String(self._text).data)
         return 'succeeded'
 
 
 class SpeechFromPoolSM(smach.StateMachine):
-    def __init__(self, pool, blocking=True): # FIXME no pool from uerdata yet... 
+    def __init__(self, pool, blocking=True):  # FIXME no pool from uerdata yet...
         smach.StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
 
         with self:
-            smach.StateMachine.add('SELECT_STRING', RandomSelectionFromPoolState(pool), 
-                                    transitions={'succeeded': 'SAY_SELECTED_MESSAGE'}, remapping={'selected_item': 'text'})
+            smach.StateMachine.add('SELECT_STRING', RandomSelectionFromPoolState(pool),
+                                   transitions={'succeeded': 'SAY_SELECTED_MESSAGE'}, remapping={'selected_item': 'text'})
             smach.StateMachine.add('SAY_SELECTED_MESSAGE', SpeechState(blocking=blocking), remapping={'text': 'text'})
 
 if __name__ == '__main__':
@@ -79,14 +81,14 @@ if __name__ == '__main__':
     # Wrap command line arguments -> tts_state.py 'TEXT'/['text', 'text'] true/false
     blocking = True
     if len(sys.argv) == 1:
-        text="This is a test text"
+        text = "This is a test text"
     elif len(sys.argv) == 2:
-        text=str(sys.argv[1])
-        if text[0] == '[' and text[-1] == ']': # Assume it is a list
-            text = list(eval(text)) # May be dirty but this is just for a rapid test...
+        text = str(sys.argv[1])
+        if text[0] == '[' and text[-1] == ']':  # Assume it is a list
+            text = list(eval(text))  # May be dirty but this is just for a rapid test...
     else:
-        text=str(sys.argv[1])
-        blocking=sys.argv[2] in ['true', '1', 't', 'y', 'yes']
+        text = str(sys.argv[1])
+        blocking = sys.argv[2] in ['true', '1', 't', 'y', 'yes']
     print "Parameters are: text =", text, " blocking =", blocking
 
     with sm:
@@ -95,6 +97,7 @@ if __name__ == '__main__':
         else:
             sm.userdata.n_checks = 0
             TOTAL_CHECKS = len(text)+2
+
             def check(userdata):
                 if userdata.n_checks > TOTAL_CHECKS:
                     return 'finished'

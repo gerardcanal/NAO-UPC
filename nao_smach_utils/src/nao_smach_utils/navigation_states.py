@@ -11,10 +11,11 @@ from tf.listener import TransformListener
 
 import math
 
+
 class FindSquare(StateMachine):
     ''' Goes around until it finds the square '''
     def __init__(self, angle=-math.pi/6):
-        StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'], output_keys=['square']) 
+        StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'], output_keys=['square'])
         self.turns = 0
         self.angle = angle
         self.has_spoken = False
@@ -22,10 +23,10 @@ class FindSquare(StateMachine):
             StateMachine.add('FIND_SQUARE1', ReadTopicSquare(), transitions={'succeeded': 'SPEAK_F', 'aborted': 'CHECK_SPEAK'})
 
             text = 'I have not found the marker. I will look around'
-            StateMachine.add('SPEAK_NF', SpeechState(text=text, blocking=False), transitions={'succeeded':'LOOK_DOWN'})
+            StateMachine.add('SPEAK_NF', SpeechState(text=text, blocking=False), transitions={'succeeded': 'LOOK_DOWN'})
 
             text = 'I have found the marker!'
-            StateMachine.add('SPEAK_F', SpeechState(text=text, blocking=True), transitions={'succeeded':'LOOK_FRONT'})
+            StateMachine.add('SPEAK_F', SpeechState(text=text, blocking=True), transitions={'succeeded': 'LOOK_FRONT'})
 
             def check_turn(ud):
                 if (self.turns == 1):
@@ -44,19 +45,19 @@ class FindSquare(StateMachine):
                 return 'succeeded'
 
             StateMachine.add('CHECK_TURN', CBState(check_turn, outcomes=['succeeded', 'go_back'], output_keys=['joint_angles']),
-                              transitions={'succeeded':'LOOK_MIDDLE', 'go_back':'PRE_GO_BACK'}, remapping={'joint_angles': 'joint_angles'})
+                             transitions={'succeeded': 'LOOK_MIDDLE', 'go_back': 'PRE_GO_BACK'}, remapping={'joint_angles': 'joint_angles'})
 
             StateMachine.add('LOOK_MIDDLE', JointAngleState(['HeadPitch'], [0.0]), transitions={'succeeded': 'LOOK_AROUND'})
 
-            StateMachine.add('LOOK_AROUND', JointAngleState(['HeadYaw']), transitions={'succeeded':'FIND_SQUARE1'})
+            StateMachine.add('LOOK_AROUND', JointAngleState(['HeadYaw']), transitions={'succeeded': 'FIND_SQUARE1'})
 
             StateMachine.add('LOOK_DOWN', JointAngleState(['HeadPitch'], [0.5]), transitions={'succeeded': 'FIND_SQUARE2'})
 
             StateMachine.add('FIND_SQUARE2', ReadTopicSquare(), transitions={'succeeded': 'SPEAK_F', 'aborted': 'CHECK_TURN'})
-            
+
             StateMachine.add('LOOK_FRONT', JointAngleState(['HeadYaw'], [0.0]), transitions={'succeeded': 'succeeded'})
 
-            StateMachine.add('PRE_GO_BACK', JointAngleState(['HeadPitch', 'HeadYaw'], [0.0, 0.0]), transitions={'succeeded':'GO_BACK'})
+            StateMachine.add('PRE_GO_BACK', JointAngleState(['HeadPitch', 'HeadYaw'], [0.0, 0.0]), transitions={'succeeded': 'GO_BACK'})
 
             StateMachine.add('GO_BACK', MoveToState(Pose2D(-0.20, 0.0, 0.0)), transitions={'succeeded': 'FIND_SQUARE1'})
 
@@ -65,17 +66,18 @@ class FindSquare(StateMachine):
                     return 'no_speak'
                 self.has_spoken = True
                 return 'speak'
-            StateMachine.add('CHECK_SPEAK', CBState(check_speak, outcomes=['speak', 'no_speak']), transitions={'speak':'SPEAK_NF', 'no_speak':'LOOK_DOWN'})
+            StateMachine.add('CHECK_SPEAK', CBState(check_speak, outcomes=['speak', 'no_speak']), transitions={'speak': 'SPEAK_NF', 'no_speak': 'LOOK_DOWN'})
+
 
 class GoToSquare(StateMachine):
-     def __init__(self, dist_m_to_square=0.50, min_x_dist=0.25, negative_vel=False):
+    def __init__(self, dist_m_to_square=0.50, min_x_dist=0.25, negative_vel=False):
         StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
         self.ALMOST_ZERO = 0.005
         self.negative_vel = negative_vel
 
         with self:
             StateMachine.add('FIND_SQUARE', FindSquare(), transitions={'succeeded': 'PREPARE_OBJ'}, remapping={'square': 'square'})
-            
+
             def put_obj(ud):
                 transf_square = transform_pose(Pose2D(ud.square.z, ud.square.x, 0.0))
                 if not self.negative_vel:
@@ -83,7 +85,7 @@ class GoToSquare(StateMachine):
                 else:
                     y_mov = -1*abs(transf_square.y)
 
-                x_mov= min(min_x_dist, abs(transf_square.x)-dist_m_to_square)
+                x_mov = min(min_x_dist, abs(transf_square.x)-dist_m_to_square)
                 print '------------------ ud.square', ud.square
                 print '------------------ transf_square', transf_square
                 print '------------------ x_mov', x_mov
@@ -99,15 +101,14 @@ class GoToSquare(StateMachine):
                 else:
                     return 'succeeded'
             StateMachine.add('PREPARE_OBJ', CBState(put_obj, outcomes=['succeeded', 'one_step_left'], input_keys=['square'], output_keys=['objective']),
-                              transitions={'succeeded':'MOVE_TO_SQ', 'one_step_left': 'MOVE_TO_FINAL'}, remapping={'objective': 'objective'})
-            
+                             transitions={'succeeded': 'MOVE_TO_SQ', 'one_step_left': 'MOVE_TO_FINAL'}, remapping={'objective': 'objective'})
+
             StateMachine.add('MOVE_TO_SQ', MoveToState(), transitions={'succeeded': 'FIND_SQUARE'}, remapping={'objective': 'objective'})
-            
+
             StateMachine.add('MOVE_TO_FINAL', MoveToState(), transitions={'succeeded': 'succeeded'}, remapping={'objective': 'objective'})
-            
+
             #text = 'I am ready to something!'
             #StateMachine.add('SAY_REACHED', SpeechState(text=text, blocking=False), transitions={'succeeded': 'succeeded'})
-
 
 
 class ReadTopicSquare(State):
@@ -141,7 +142,7 @@ class ReadTopicSquare(State):
             timeout = (rospy.Time.now()-startT) > self._timeout
 
         subs.unregister()
- 
+
         if self._square:
             userdata.square = self._square
             self._square = None
@@ -157,6 +158,7 @@ class ReadTopicSquare(State):
         else:
             return 'aborted'
 
+
 def transform_pose(_pose2D, src_frame='CameraTop_frame', dst_frame='/base_footprint', timeout=3):
     tl = TransformListener()
     pose_stamped = PoseStamped()
@@ -165,9 +167,8 @@ def transform_pose(_pose2D, src_frame='CameraTop_frame', dst_frame='/base_footpr
     pose_stamped.pose = Pose(Point(_pose2D.x, _pose2D.y, 0.0), Quaternion())
 
     try:
-        tl.waitForTransform(
-                target_frame=dst_frame, source_frame=src_frame,
-                time=rospy.Time(), timeout=rospy.Duration(timeout))
+        tl.waitForTransform(target_frame=dst_frame, source_frame=src_frame,
+                            time=rospy.Time(), timeout=rospy.Duration(timeout))
         pose_transf = tl.transformPose(dst_frame, pose_stamped)
     except Exception as e:
         rospy.logwarn("Transformation failed!!! %s" % str(e))

@@ -3,6 +3,7 @@ import rospy
 from smach import State
 import threading
 
+
 class ReadTopicState(State):
     def __init__(self, topic_name, topic_type, output_key_name='topic_data', timeout=None):
         State.__init__(self, outcomes=['succeeded', 'timeouted'], output_keys=[output_key_name])
@@ -24,7 +25,7 @@ class ReadTopicState(State):
         startT = rospy.Time.now()
         while not finished:
             self._mutex.acquire()
-            got_data = self._topic_data is not None # If topic_data is not None then we have received data
+            got_data = self._topic_data is not None  # If topic_data is not None then we have received data
             self._mutex.release()
 
             timeouted = ((rospy.Time.now()-startT) > self._timeout) if self._timeout else False
@@ -34,7 +35,7 @@ class ReadTopicState(State):
 
         #ud.topic_data = self._topic_data
         setattr(ud, self._output_key_name, self._topic_data)
-        if self._topic_data: # No mutex here as it should not be a problem
+        if self._topic_data:  # No mutex here as it should not be a problem
             return 'succeeded'
         else:
             return 'timeouted'
@@ -46,10 +47,11 @@ if __name__ == "__main__":
     sm = StateMachine(outcomes=['succeeded'])
     with sm:
         StateMachine.add('READTOPIC', ReadTopicState('/test', String, output_key_name='test_key', timeout=10), transitions={'succeeded': 'succeeded', 'timeouted': 'SAYTIMEOUT'})
+
         def cb(ud):
             rospy.logwarn('READ TOPIC STATE TIMEOUTED WITHOUT RECEIVING MESSAGES')
             return 'succeeded'
-        StateMachine.add('SAYTIMEOUT', CBState(cb, outcomes=['succeeded']), transitions={'succeeded':'READTOPIC'})
+        StateMachine.add('SAYTIMEOUT', CBState(cb, outcomes=['succeeded']), transitions={'succeeded': 'READTOPIC'})
 
     sm.execute()
     rospy.loginfo('Data received is: ' + sm.userdata.test_key.data)
