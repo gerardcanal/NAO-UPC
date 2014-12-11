@@ -5,6 +5,11 @@ import threading
 
 
 class ReadTopicState(State):
+    ''' topic_name is the name of the topic i.e. /speech.
+        topic_type is the object type of the node i.e. std_msg.msg/String
+        output_key_name is the name of the output key which will have the information read in the topic
+        timeout is the amount of time the topic has to wait until finish. if none it waits forever
+    '''
     def __init__(self, topic_name, topic_type, output_key_name='topic_data', timeout=None):
         State.__init__(self, outcomes=['succeeded', 'timeouted'], output_keys=[output_key_name])
         self._topic = topic_name
@@ -30,6 +35,7 @@ class ReadTopicState(State):
 
             timeouted = ((rospy.Time.now()-startT) > self._timeout) if self._timeout else False
             finished = got_data or timeouted
+            rospy.sleep(0.05)
 
         subs.unregister()
 
