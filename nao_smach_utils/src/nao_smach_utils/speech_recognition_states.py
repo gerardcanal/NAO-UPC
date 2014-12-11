@@ -19,19 +19,22 @@ class StopRecognitionState(ServiceState):
 
 
 class GetRecognizedWord(smach.State):  # FIXME should be tested to see when the information is published
-    def __init__(self, timeout=None):
+    def __init__(self, timeout=None, sleeptime=1.5):
         ''' timeout is the time in seconds in which the node will stop waiting for the topic to be published. '''
         smach.State.__init__(self, outcomes=['succeeded', 'timeouted'], output_keys=['recognized_words'])
         self._mutex = threading.Lock()
         self._recognized = None
         self._timeout = timeout
+        self._sleeptime = sleeptime
 
     def _word_cb(self, msg):
         self._mutex.acquire()
-        self._recognized = msg
+        if msg.words:
+            self._recognized = msg
         self._mutex.release()
 
     def execute(self, userdata):
+        rospy.sleep(self._sleeptime)
         subs = rospy.Subscriber("word_recognized", WordRecognized, callback=self._word_cb)
 
         def has_recognized():
