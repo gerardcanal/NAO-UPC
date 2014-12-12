@@ -65,7 +65,7 @@ class SpeechState_NonBlocking(smach.State):
 
 
 class SpeechFromPoolSM(smach.StateMachine):
-    def __init__(self, pool, blocking=True):  # FIXME no pool from uerdata yet...
+    def __init__(self, pool, blocking=True):  # TODO no pool from userdata yet...
         smach.StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
 
         with self:

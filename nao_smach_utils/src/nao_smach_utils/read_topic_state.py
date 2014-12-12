@@ -41,6 +41,7 @@ class ReadTopicState(State):
 
         #ud.topic_data = self._topic_data
         setattr(ud, self._output_key_name, self._topic_data)
+        self._topic_data = None  # Set topic data to None for the next call
         if self._topic_data:  # No mutex here as it should not be a problem
             return 'succeeded'
         else:
