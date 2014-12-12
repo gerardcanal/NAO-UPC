@@ -19,7 +19,7 @@ def _checkInstalledBehavior(behavior_name):
     get_behaviors = rospy.ServiceProxy('get_installed_behaviors', GetInstalledBehaviors)
     res = get_behaviors()
     if not behavior_name in res.behaviors:
-        rospy.logerr('behavior "%s" is NOT installed in the NAO! Available behaviors are: %s. Shutting down node...' % (behavior_name, str(res.behaviors)))
+        rospy.logerr('Behavior "%s" is NOT installed in the NAO! Available behaviors are: %s. Shutting down node...' % (behavior_name, str(res.behaviors)))
         sys.exit(-1)
 
 
