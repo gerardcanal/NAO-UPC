@@ -25,6 +25,7 @@ class ReadTopicState(State):
         self._mutex.release()
 
     def execute(self, ud):
+        self._topic_data = None  # Set topic data to None for the next call
         subs = rospy.Subscriber(self._topic, self._topic_type, self._topic_cb)
         finished = False
         startT = rospy.Time.now()
@@ -41,7 +42,6 @@ class ReadTopicState(State):
 
         #ud.topic_data = self._topic_data
         setattr(ud, self._output_key_name, self._topic_data)
-        self._topic_data = None  # Set topic data to None for the next call
         if self._topic_data:  # No mutex here as it should not be a problem
             return 'succeeded'
         else:
