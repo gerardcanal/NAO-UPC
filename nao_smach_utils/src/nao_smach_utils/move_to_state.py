@@ -13,6 +13,7 @@ from smach_ros import ServiceState
 from naoqi_msgs.srv import CmdPoseService, CmdPoseServiceRequest
 from geometry_msgs.msg import Pose2D
 
+
 class MoveToState(ServiceState):
 
     '''
@@ -30,7 +31,7 @@ class MoveToState(ServiceState):
 
     No output keys.
     No io_keys.
-    
+
      ## Returns:
         # Succeded  -> when topic is published.
         # Preempted -> None
@@ -57,7 +58,7 @@ class MoveToState(ServiceState):
             self._objective = objective
 
         # Class constructor
-        ServiceState.__init__(self, '/cmd_pose_srv', CmdPoseService, outcomes=['succeeded'], request_cb = self.move_to_request_cb, input_keys=input_keys)
+        ServiceState.__init__(self, '/cmd_pose_srv', CmdPoseService, outcomes=['succeeded'], request_cb=self.move_to_request_cb, input_keys=input_keys)
 
     # Method to define the goal
     def move_to_request_cb(self, ud, request):
@@ -74,11 +75,11 @@ class MoveToState(ServiceState):
 
     # Method to execute the state
     def execute(self, ud):
-       rospy.loginfo('Moving to ' + str(self._objective) if self._objective else str(ud.objective))
-       return super(MoveToState, self).execute(ud)
+        rospy.loginfo('Moving to ' + str(self._objective) if self._objective else str(ud.objective))
+        return super(MoveToState, self).execute(ud)
 
 
-# Standalone execution 
+# Standalone execution
 def main():
 
     # Path to follow
@@ -91,12 +92,11 @@ def main():
     with sm:
 
         smach.StateMachine.add('MOVE_TO',
-                                MoveToState(),
-                                transitions={'succeeded': 'succeeded'})
+                               MoveToState(),
+                               transitions={'succeeded': 'succeeded'})
 
         # Execute the state machine
         sm.execute()
 
 if __name__ == '__main__':
     main()
-
