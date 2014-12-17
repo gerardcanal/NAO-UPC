@@ -20,23 +20,21 @@ motionProxy = None
 
 
 def stop_walking(stop_method, who):
-    motionProxy.stopMove() # killWalk()
-    if isinstance(stop_method, rospy.ServiceProxy): # Service call
+    motionProxy.stopMove()  # killWalk()
+    if isinstance(stop_method, rospy.ServiceProxy):  # Service call
         stop_method()
-    else: # Publish cal
+    else:  # Publish call
         stop_method.publish(Twist(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0)))
     emergency_stop_publisher.publish("Emergency stop has stopped the robot walk because of %s!" % who)
 
 
-
 def bumper_callback(data, stop_method):
     bumper = 'Left bumper' if data.bumper == data.left else 'Right bumper'
-    if data.state == data.statePressed: # bumper was pressed!!!
+    if data.state == data.statePressed:  # bumper was pressed!!!
         stop_walking(stop_method, bumper)
         rospy.loginfo('%s was pressed! Stop message has been sent.' % bumper)
     else:
         rospy.loginfo('%s was released. Nothing to do.' % bumper)
-
 
 
 def tactile_touch_callback(data, stop_method):
@@ -54,27 +52,26 @@ def tactile_touch_callback(data, stop_method):
         rospy.loginfo('%s was released. Nothing to do.' % button)
 
 
+OFFSET = 0.045  # m offset from min_range
 
-OFFSET = 0.045 # m offset from min_range
+
 def sonar_cb(data, arg):
     #print data.range, data.min_range+OFFSET
-    if data.range <= data.min_range+OFFSET: 
+    if data.range <= data.min_range+OFFSET:
         stop_method = arg[0]
         stop_walking(stop_method, arg[1] + ' sonar')
         rospy.loginfo('%s sonar detected obstacle at minimum range: %f. Stop message has been sent.' % (arg[1], data.range))
-
-
 
 
 if __name__ == '__main__':
     # Parse arguments
     parser = ArgumentParser()
     parser.add_argument("--pip", dest="pip", default=IP,
-                      help="IP/hostname of parent broker. Default is 127.0.0.1.", metavar="IP")
+                        help="IP/hostname of parent broker. Default is 127.0.0.1.", metavar="IP")
     parser.add_argument("--pport", dest="pport", default=PORT, type=int,
-                      help="port of parent broker. Default is 9559.", metavar="PORT")
+                        help="port of parent broker. Default is 9559.", metavar="PORT")
     parser.add_argument("--psonar", dest="psonar", default=USE_SONAR, type=(lambda v: v.lower() in ("yes", "true", "t", "1")),
-                      help="whether it uses the sonar for the emergency stop or not.", metavar="USE_SONAR")
+                        help="whether it uses the sonar for the emergency stop or not.", metavar="USE_SONAR")
 
     args = parser.parse_args(args=rospy.myargv(argv=sys.argv)[1:])
     IP = args.pip
@@ -90,23 +87,22 @@ if __name__ == '__main__':
     emergency_stop_publisher = rospy.Publisher('/emergency_stop', String, queue_size=5)
 
     try:
-        rospy.wait_for_service('/stop_walk_srv', timeout=3.0)# wait as 3 s much
+        rospy.wait_for_service('/stop_walk_srv', timeout=3.0)  # wait as 3 s much
         stop_method = rospy.ServiceProxy('/stop_walk_srv', Empty)
     except rospy.ROSException:
         rospy.logwarn('/stop_walk_srv server is not running after 3.0 seconds! Using the cmd_vel topic instead...')
         stop_method = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
-    
 
     rospy.Subscriber("bumper", Bumper, bumper_callback, callback_args=stop_method)
     rospy.Subscriber("tactile_touch", TactileTouch, tactile_touch_callback, callback_args=stop_method)
     if USE_SONAR:
-        left_topic = '/nao/sonar_left'   # nao_sonar/left -- mine
-        right_topic = '/nao/sonar_right' # nao_sonar/right -- mine
+        left_topic = '/nao_robot/left/sonar'    # nao_sonar/left -- mine
+        right_topic = '/nao_robot/right/sonar'  # nao_sonar/right -- mine
         rospy.Subscriber(right_topic, Range, sonar_cb, callback_args=[stop_method, 'Right'], queue_size=10)
         rospy.Subscriber(left_topic, Range, sonar_cb, callback_args=[stop_method, 'Left'], queue_size=10)
 
     speak = rospy.Publisher('/speech', String, latch=True, queue_size=1)
     rospy.loginfo('EMERGENCY STOP HAS BEEN ENABLED!')
     speak.publish(String('Emergency Stop has been enabled!'))
-    
+
     rospy.spin()

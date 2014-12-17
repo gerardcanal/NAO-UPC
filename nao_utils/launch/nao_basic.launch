@@ -6,6 +6,10 @@
     For a remote connection, change IP and port accordingly in the NAO_IP and NAO_PORT 
     environment variables.
   -->
+
+  <param name="/nao_walker/use_foot_gait_config" value="True" />
+  <rosparam param="/nao_walker/foot_gait_config">[["aMaxStepFrequency", 0.5]]</rosparam>
+
   <!-- 
   	This pushes the local PYTHONPATH into the launch file, so that the NaoQI API is found.
     You need to add the Nao's API dir to your PYTHONPATH so that the modules are found.
@@ -22,7 +26,18 @@
   <include file="$(find naoqi_sensors)/launch/camera.launch" ns="nao_robot/camera/top">
     <arg name="resolution" value="2" />
   </include>
-  <include file="$(find naoqi_sensors)/launch/sonar.launch" />
+  
+  <!-- Sonars -->
+  <include file="$(find naoqi_sensors)/launch/sonar.launch" ns="/nao_robot/left">
+    <arg name="memory_key" value="Device/SubDeviceList/US/Left/Sensor/Value" />
+    <arg name="frame_id" value="LSonar_frame" />
+  </include>
+
+  <include file="$(find naoqi_sensors)/launch/sonar.launch" ns="/nao_robot/right">
+    <arg name="memory_key" value="Device/SubDeviceList/US/Right/Sensor/Value" />
+    <arg name="frame_id" value="RSonar_frame" />
+  </include>
+  <!-- -->
 
   <include file="$(find nao_apps)/launch/nao_speech.launch" />
 
