@@ -8,7 +8,7 @@
   -->
 
   <param name="/nao_walker/use_foot_gait_config" value="True" />
-  <rosparam param="/nao_walker/foot_gait_config">[["aMaxStepFrequency", 0.5]]</rosparam>
+  <rosparam param="/nao_walker/foot_gait_config">[["MaxStepFrequency", 0.5]]</rosparam>
 
   <!-- 
   	This pushes the local PYTHONPATH into the launch file, so that the NaoQI API is found.
