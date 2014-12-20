@@ -43,10 +43,14 @@ class ExecuteBehavior(SimpleActionState):
 
 
 class ExecuteBehaviorFromPoolSM(StateMachine):
-    def __init__(self, behavior_pool):
-        StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
-        if not isinstance(behavior_pool, list) and isinstance(behavior_pool, str):
+    def __init__(self, behavior_pool=None):
+        input_keys = []
+        if not behavior_pool:
+            input_keys = ['behavior_pool']
+        elif not isinstance(behavior_pool, list) and isinstance(behavior_pool, str):
             behavior_pool = [behavior_pool]
+
+        StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'], input_keys=input_keys)
 
         for beh_name in behavior_pool:
             _checkInstalledBehavior(beh_name)

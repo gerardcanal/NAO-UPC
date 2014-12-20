@@ -75,10 +75,14 @@ class SpeechState_NonBlocking(smach.State):
 
 
 class SpeechFromPoolSM(smach.StateMachine):
-    def __init__(self, pool, blocking=True, wait_before_speak=None):  # TODO no pool from userdata yet...
-        smach.StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
-        if not isinstance(pool, list) and isinstance(pool, str):
+    def __init__(self, pool=None, blocking=True, wait_before_speak=None):
+        input_keys = []
+        if not pool:
+            input_keys = ['pool']
+        elif not isinstance(pool, list) and isinstance(pool, str):
             pool = [pool]
+
+        smach.StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'], input_keys=input_keys)
 
         with self:
             smach.StateMachine.add('SELECT_STRING', RandomSelectionFromPoolState(pool),
