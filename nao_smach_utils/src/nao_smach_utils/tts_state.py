@@ -9,21 +9,23 @@ from random_selection_state import RandomSelectionFromPoolState
 
 
 #Wrapper to the startwalking states for the blocking and non blocking
-def SpeechState(text=None, blocking=True):
+def SpeechState(text=None, blocking=True, wait_before_speak=None):
     if not blocking:
-        return SpeechState_NonBlocking(text)
+        return SpeechState_NonBlocking(text, wait_before_speak)
     else:
-        return SpeechState_Blocking(text)
+        return SpeechState_Blocking(text, wait_before_speak)
 
 
 class SpeechState_Blocking(SimpleActionState):
     '''Speech state with a call to the ActionServer'''
-    def __init__(self, text=None):
+    def __init__(self, text=None, wait_before_speak=None):
         ''' If text is used, it will be that text which the robot will say. '''
         self._text = text
         input_keys = []
         if not text:
             input_keys = ['text']
+
+        self._wait_before_speak = wait_before_speak
 
         # Method to define the goal
         def tts_request_cb(ud, goal):
@@ -36,11 +38,16 @@ class SpeechState_Blocking(SimpleActionState):
 
         SimpleActionState.__init__(self, '/speech_action', SpeechWithFeedbackAction, input_keys=input_keys, goal_cb=tts_request_cb)
 
+    def execute(self, userdata):
+        if self._wait_before_speak:
+            rospy.sleep(self._wait_before_speak)
+        return super(SpeechState_Blocking, self).execute(userdata)
+
 
 class SpeechState_NonBlocking(smach.State):
-    ''' State which makes the NAO pronunce a speech. '''
+    ''' State which makes the NAO pronunce a speech. Wait before speak is the time it should wait before sending the speak command, in seconds.'''
 
-    def __init__(self, text=None):
+    def __init__(self, text=None, wait_before_speak=None):
         ''' If text is used, it will be that text which the robot will say. '''
         self._text = text
         input_keys = []
@@ -48,6 +55,7 @@ class SpeechState_NonBlocking(smach.State):
             input_keys = ['text']
         # Note: it seems that not passing the queue_size() makes it work synchronously and doesn't loose messages
         self._pub = rospy.Publisher('/speech', String, latch=True, queue_size=10)
+        self._wait_before_speak = wait_before_speak
         #rospy.sleep(0.5)
         smach.State.__init__(self, outcomes=['succeeded'], input_keys=input_keys)
 
@@ -56,8 +64,10 @@ class SpeechState_NonBlocking(smach.State):
             text_to_say = userdata.text
         else:
             text_to_say = self._text
-        # Try to publish until the publisher is not connected to the topic
-        #while self._pub.get_num_connections() == 0:
+
+        if self._wait_before_speak:
+            rospy.sleep(self._wait_before_speak)
+
         self._pub.publish(String(text_to_say))
         rospy.sleep(0.2)  # give time to publish
         rospy.loginfo("The published message to say is: %s" % String(self._text).data)
@@ -65,7 +75,7 @@ class SpeechState_NonBlocking(smach.State):
 
 
 class SpeechFromPoolSM(smach.StateMachine):
-    def __init__(self, pool, blocking=True):  # TODO no pool from userdata yet...
+    def __init__(self, pool, blocking=True, wait_before_speak=None):  # TODO no pool from userdata yet...
         smach.StateMachine.__init__(self, outcomes=['succeeded', 'preempted', 'aborted'])
         if not isinstance(pool, list) and isinstance(pool, str):
             pool = [pool]
@@ -73,7 +83,7 @@ class SpeechFromPoolSM(smach.StateMachine):
         with self:
             smach.StateMachine.add('SELECT_STRING', RandomSelectionFromPoolState(pool),
                                    transitions={'succeeded': 'SAY_SELECTED_MESSAGE'}, remapping={'selected_item': 'text'})
-            smach.StateMachine.add('SAY_SELECTED_MESSAGE', SpeechState(blocking=blocking), remapping={'text': 'text'})
+            smach.StateMachine.add('SAY_SELECTED_MESSAGE', SpeechState(blocking=blocking, wait_before_speak=wait_before_speak), remapping={'text': 'text'})
 
 if __name__ == '__main__':
     import sys
