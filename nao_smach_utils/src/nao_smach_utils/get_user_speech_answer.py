@@ -10,7 +10,7 @@ class GetUserAnswer(StateMachine):
         ''' If get_one is True, recognition_result is just the topic information. If it's false is a string with the most confident word.
             If ask_for_repetition is True, the robot asks the user to repeat the response (for now it does it forever)
         '''
-        StateMachine.__init__(self, outcomes=['succeeded', 'aborted', 'preempted'], input_keys=['text'], output_keys=['recognition_result'])
+        StateMachine.__init__(self, outcomes=['succeeded', 'aborted', 'preempted'], output_keys=['recognition_result'])
         with self:
             StateMachine.add('START_LISTEN',
                              StartRecognitionState(),
