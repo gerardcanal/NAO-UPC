@@ -57,7 +57,7 @@ class CheckNodesState(smach.State):
             rospy.loginfo('Checking service %s: OK' % service_name)
             return 'succeeded'
         else:
-            rospy.loginfo('Checking service %s: Failed' % service_name)
+            rospy.logerr('Checking service %s: Failed' % service_name)
             self.ALL_OK = False
             return 'aborted'
 
@@ -78,18 +78,18 @@ class CheckNodesState(smach.State):
                 rospy.loginfo('Checking action %s: OK' % action_name)
                 return 'succeeded'
 
-        rospy.loginfo('Checking action %s: Failed' % action_name)
+        rospy.logerr('Checking action %s: Failed' % action_name)
         self.ALL_OK = False
         return 'aborted'
 
     # Check a specific param
     def checkParam(self, param_name):
         params = rospy.get_param_names()
-        if any([x for x in params if x==param_name]):
+        if any([x for x in params if x == param_name]):
             rospy.loginfo('Checking param %s: OK' % param_name)
             return 'succeeded'
         else:
-            rospy.loginfo('Checking param %s: Failed' % param_name)
+            rospy.logerr('Checking param %s: Failed' % param_name)
             self.ALL_OK = False
             return 'aborted'
 
@@ -137,7 +137,8 @@ class CheckNodesState(smach.State):
         self.checkParams()
         return 'succeeded' if self.ALL_OK else 'aborted'
 
-# Standalone execution 
+
+# Standalone execution
 def main():
 
     # Nodes names to check
@@ -153,8 +154,8 @@ def main():
     with sm:
 
         smach.StateMachine.add('CHECKING_NODES',
-                                CheckNodesState(TOPIC_LIST_NAMES, SERVICES_LIST_NAMES, ACTION_LIST_NAMES, PARAMS_LIST_NAMES),
-                                transitions={'succeeded': 'succeeded', 'aborted': 'aborted'})
+                               CheckNodesState(TOPIC_LIST_NAMES, SERVICES_LIST_NAMES, ACTION_LIST_NAMES, PARAMS_LIST_NAMES),
+                               transitions={'succeeded': 'succeeded', 'aborted': 'aborted'})
 
         # Execute the state machine
         sm.execute()
