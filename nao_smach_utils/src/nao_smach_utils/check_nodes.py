@@ -11,6 +11,7 @@ import rospy
 import rosservice
 import rosgraph.masterapi
 
+
 class CheckNodesState(smach.State):
 
     '''
@@ -25,7 +26,7 @@ class CheckNodesState(smach.State):
     @param service_names: list of strings with the services names to check.
     @param action_names: list of strings with the actions names to check.
     @param params_names: list of strings with the params names to check.
-    
+
     No input keys.
     No output keys.
     No io_keys.
@@ -63,10 +64,10 @@ class CheckNodesState(smach.State):
     # Check a specific topic
     def checkTopic(self, topic_name):
         publishers = rosgraph.Master('rostopic').getSystemState()[0]
-        if any([x for x in publishers if x[0]==topic_name]):
+        if any([x for x in publishers if x[0] == topic_name]):
             rospy.loginfo('Checking topic %s: OK' % topic_name)
         else:
-            rospy.loginfo('Checking topic %s: Failed' % topic_name)
+            rospy.logerr('Checking topic %s: Failed' % topic_name)
             self.ALL_OK = False
 
     # Check a specific action
