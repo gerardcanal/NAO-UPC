@@ -16,7 +16,7 @@ class RandomSelectionFromPoolState(State):
 
         State.__init__(self, outcomes=['succeeded'], output_keys=['selected_item'], input_keys=input_keys)
         self._pool = pool
-        self._lenpool = len(pool)
+        self._lenpool = len(pool) if pool else None
         self._lastSelection = None
         self._MAX_TRIES = max_tries
 
