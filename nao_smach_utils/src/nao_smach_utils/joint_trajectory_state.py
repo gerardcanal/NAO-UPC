@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import rospy
 import sys
-import smach
 
-from smach import StateMachine, State
+from smach import StateMachine
 from smach_ros import SimpleActionState
 from naoqi_msgs.msg import JointAnglesWithSpeedAction, JointAnglesWithSpeedGoal
+
 
 class JointAngleState(SimpleActionState):
     '''Joint state which publish an angle movement'''
@@ -14,7 +14,7 @@ class JointAngleState(SimpleActionState):
         self.joint_angles = joint_angles
         input_keys = []
         if joint_angles is None:
-            input_keys=['joint_angles']
+            input_keys = ['joint_angles']
 
         # Method to define the goal
         def joint_request_cb(ud, goal):
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     sm = StateMachine(outcomes=['succeeded', 'preempted', 'aborted'])
 
     if len(sys.argv) == 3:
-        joint_name=[str(sys.argv[1])]
-        angle_val=[float(sys.argv[2])]
+        joint_name = [str(sys.argv[1])]
+        angle_val = [float(sys.argv[2])]
     else:
         joint_name = None
         angle_val = None

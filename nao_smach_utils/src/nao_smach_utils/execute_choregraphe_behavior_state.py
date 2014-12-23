@@ -63,7 +63,12 @@ if __name__ == '__main__':
     rospy.init_node("execute_bahvior_smach_test")
 
     sm = StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
-    sm.userdata.behavior_name = 'putoff_upper_fire'
+    if len(sys.argv) > 1:
+        beh_name = sys.argv[1]
+    else:
+        rospy.logerr('Expected behavior name as argument!')
+        sys.exit(-1)
+    sm.userdata.behavior_name = beh_name
     with sm:
         StateMachine.add("EXEC_BEHAVIOR", ExecuteBehavior())
         pool = ExecuteBehaviorFromPoolSM(['putoff_upper_fire', 'tomato_grasp', 'tomato_release'])
