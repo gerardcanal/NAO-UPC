@@ -36,6 +36,8 @@ class ReadTopicState(State):
 
             timeouted = ((rospy.Time.now()-startT) > self._timeout) if self._timeout else False
             finished = got_data or timeouted
+            if rospy.is_shutdown():
+                return 'timeouted'
             rospy.sleep(0.05)
 
         subs.unregister()

@@ -14,7 +14,8 @@ def _checkInstalledBehavior(behavior_name):
     try:
         rospy.wait_for_service('get_installed_behaviors', _NSEC)  # wait as NSEC as much
     except rospy.ROSException:
-        rospy.logerr('/run_behavior Action server is not running after %f seconds! Shutting down node...' % (_NSEC, behavior_name))
+        print _NSEC, behavior_name
+        rospy.logerr('/run_behavior Action server is not running after %f seconds! Shutting down node...' % (_NSEC))
         sys.exit(-1)
     get_behaviors = rospy.ServiceProxy('get_installed_behaviors', GetInstalledBehaviors)
     res = get_behaviors()
@@ -65,6 +66,7 @@ if __name__ == '__main__':
     sm = StateMachine(outcomes=['succeeded', 'aborted', 'preempted'])
     if len(sys.argv) > 1:
         beh_name = sys.argv[1]
+        _checkInstalledBehavior(beh_name)
     else:
         rospy.logerr('Expected behavior name as argument!')
         sys.exit(-1)
