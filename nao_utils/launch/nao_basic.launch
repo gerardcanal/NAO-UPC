@@ -25,6 +25,7 @@
   <!-- Specify here all dependent settings (default top) -->
   <include file="$(find naoqi_sensors)/launch/camera.launch" ns="nao_robot/camera/top">
     <arg name="resolution" value="2" />
+    <arg name="frame_rate" default="30" />
   </include>
   
   <!-- Sonars -->
