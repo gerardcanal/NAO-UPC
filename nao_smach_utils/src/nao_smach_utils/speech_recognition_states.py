@@ -57,6 +57,7 @@ class GetRecognizedWordNoEmptyList(State):
     def execute(self, userdata):
         self._recognized = None
         subs = rospy.Subscriber("word_recognized", WordRecognized, callback=self._word_cb)
+
         def has_recognized():
             self._mutex.acquire()
             rec = self._recognized is not None
@@ -65,7 +66,7 @@ class GetRecognizedWordNoEmptyList(State):
 
         start_time = rospy.Time().now()
         while not has_recognized():
-            if self._timeout is not None or self._timeout > 0:
+            if self._timeout is not None or self._timeout > 0 or rospy.is_shutdown():
                 time_running = rospy.Time.now() - start_time
                 if time_running > rospy.Duration(self._timeout):
                     subs.unregister()

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import rospy
 from smach import StateMachine, CBState
 from nao_smach_utils.speech_recognition_states import StartRecognitionState, StopRecognitionState, GetRecognizedWordNoEmptyList
 from nao_smach_utils.tts_state import SpeechFromPoolSM
@@ -29,6 +30,7 @@ class GetUserAnswer(StateMachine):
             def get_most_confident_word(ud):
                 sorted_result = sorted(zip(ud.in_recognition_result.confidence_values, ud.in_recognition_result.words), reverse=True)
                 ud.out_recognition_result = sorted_result[0][1]  # Get the most confident [0] word [1]
+                rospy.loginfo('---Get user answer recognized word: ' + sorted_result[0][1])
                 return 'succeeded'
 
             StateMachine.add('GET_SINGLE_RESPONSE',
