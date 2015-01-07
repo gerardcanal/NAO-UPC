@@ -7,7 +7,7 @@ from nao_smach_utils.tts_state import SpeechFromPoolSM
 
 class GetUserAnswer(StateMachine):
 
-    def __init__(self, get_one=True, ask_for_repetition=True):
+    def __init__(self, get_one=True, ask_for_repetition=True, timeout=30):
         ''' If get_one is True, recognition_result is just the topic information. If it's false is a string with the most confident word.
             If ask_for_repetition is True, the robot asks the user to repeat the response (for now it does it forever)
         '''
@@ -18,7 +18,7 @@ class GetUserAnswer(StateMachine):
                              transitions={'succeeded': 'ANSWER_DETECTION'})
 
             StateMachine.add('ANSWER_DETECTION',
-                             GetRecognizedWordNoEmptyList(timeout=30),
+                             GetRecognizedWordNoEmptyList(timeout=timeout),
                              transitions={'succeeded': 'STOP_LISTEN',
                                           'timeouted': 'STOP_LISTEN_ABORTED'},
                              remapping={'recognized_words': 'recognition_result'})

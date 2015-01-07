@@ -66,7 +66,9 @@ class GetRecognizedWordNoEmptyList(State):
 
         start_time = rospy.Time().now()
         while not has_recognized():
-            if self._timeout is not None or self._timeout > 0 or rospy.is_shutdown():
+            if rospy.is_shutdown():
+                break
+            if self._timeout is not None or self._timeout > 0:
                 time_running = rospy.Time.now() - start_time
                 if time_running > rospy.Duration(self._timeout):
                     subs.unregister()
