@@ -11,7 +11,7 @@ class ReadTopicState(State):
         timeout is the amount of time the topic has to wait until finish. if none it waits forever
     '''
     def __init__(self, topic_name, topic_type, output_key_name='topic_data', timeout=None):
-        State.__init__(self, outcomes=['succeeded', 'timeouted'], output_keys=[output_key_name])
+        State.__init__(self, outcomes=['succeeded', 'timeouted', 'preempted'], output_keys=[output_key_name])
         self._topic = topic_name
         self._topic_type = topic_type
         self._timeout = rospy.Duration(timeout) if timeout else None
@@ -30,6 +30,8 @@ class ReadTopicState(State):
         finished = False
         startT = rospy.Time.now()
         while not finished:
+            if self.preempt_requested():
+                break
             self._mutex.acquire()
             got_data = self._topic_data is not None  # If topic_data is not None then we have received data
             self._mutex.release()
@@ -41,6 +43,10 @@ class ReadTopicState(State):
             rospy.sleep(0.05)
 
         subs.unregister()
+
+        if self.preempt_requested():
+            setattr(ud, self._output_key_name, None)
+            return 'preempted'
 
         #ud.topic_data = self._topic_data
         setattr(ud, self._output_key_name, self._topic_data)

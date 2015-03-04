@@ -43,7 +43,7 @@ class GetRecognizedWordNoEmptyList(State):
 
     def __init__(self, timeout=None):
         ''' timeout is the time in seconds in which the node will stop waiting for the topic to be published. '''
-        State.__init__(self, outcomes=['succeeded', 'timeouted'], output_keys=['recognized_words'])
+        State.__init__(self, outcomes=['succeeded', 'timeouted', 'preempted'], output_keys=['recognized_words'])
         self._mutex = threading.Lock()
         self._recognized = None
         self._timeout = timeout
@@ -66,7 +66,7 @@ class GetRecognizedWordNoEmptyList(State):
 
         start_time = rospy.Time().now()
         while not has_recognized():
-            if rospy.is_shutdown():
+            if rospy.is_shutdown() or self.preempt_requested():
                 break
             if self._timeout is not None or self._timeout > 0:
                 time_running = rospy.Time.now() - start_time
@@ -74,6 +74,9 @@ class GetRecognizedWordNoEmptyList(State):
                     subs.unregister()
                     return 'timeouted'
         subs.unregister()
+        if (self.preempt_requested()):
+            userdata.recognized_words = None
+            return 'preempted'
         #Fill userdata with the recognized message
         userdata.recognized_words = self._recognized
         return 'succeeded'

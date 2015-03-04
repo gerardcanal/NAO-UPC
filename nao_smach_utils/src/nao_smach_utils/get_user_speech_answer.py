@@ -12,6 +12,7 @@ class GetUserAnswer(StateMachine):
             If ask_for_repetition is True, the robot asks the user to repeat the response (for now it does it forever)
         '''
         StateMachine.__init__(self, outcomes=['succeeded', 'aborted', 'preempted'], output_keys=['recognition_result'])
+        self.userdata.recognition_result = None
         with self:
             StateMachine.add('START_LISTEN',
                              StartRecognitionState(),
@@ -20,7 +21,8 @@ class GetUserAnswer(StateMachine):
             StateMachine.add('ANSWER_DETECTION',
                              GetRecognizedWordNoEmptyList(timeout=timeout),
                              transitions={'succeeded': 'STOP_LISTEN',
-                                          'timeouted': 'STOP_LISTEN_ABORTED'},
+                                          'timeouted': 'STOP_LISTEN_ABORTED',
+                                          'preempted': 'preempted'},
                              remapping={'recognized_words': 'recognition_result'})
 
             StateMachine.add('STOP_LISTEN',
